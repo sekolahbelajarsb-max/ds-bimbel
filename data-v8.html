@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ds Bimbel V8 | Pusat Data</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial;background:#f4f7fb;color:#18233b}
+header{background:#071a4a;color:#fff;padding:24px}.wrap{width:min(1050px,92%);margin:auto}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.card{background:#fff;border:1px solid #e0e7f0;border-radius:16px;padding:20px;margin-top:16px}.btn{display:inline-block;padding:11px 15px;border:0;border-radius:9px;font-weight:800;cursor:pointer;text-decoration:none}.primary{background:#1356c5;color:#fff}.light{background:#edf3ff;color:#1356c5}pre{white-space:pre-wrap;background:#0b1630;color:#dce7ff;padding:16px;border-radius:12px;overflow:auto}.muted{color:#68758b}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1 style="margin:0">DS BIMBEL V8</h1><p style="margin:5px 0;color:#c9d6ee">Pusat Data & Persiapan Database Online</p></div></header>
+<main class="wrap">
+<div class="grid">
+<div class="card"><h3>👨‍🎓 Siswa</h3><p class="muted">Data identitas, program, area, status.</p></div>
+<div class="card"><h3>📅 Jadwal</h3><p class="muted">Relasi siswa, tutor, tanggal, jam, status.</p></div>
+<div class="card"><h3>💳 Keuangan</h3><p class="muted">Pembayaran dan status lunas.</p></div>
+</div>
+<div class="card"><h2>Arsitektur V8</h2>
+<p>Website publik dan dashboard tetap dapat digunakan secara lokal. Struktur PostgreSQL sudah disiapkan untuk tahap koneksi backend.</p>
+<pre>Website → API Server → PostgreSQL
+             ↓
+       Auth Admin (session)
+             ↓
+      Siswa / Tutor / Jadwal
+      Absensi / Pembayaran</pre>
+</div>
+<div class="card"><h2>Export data lokal</h2>
+<p class="muted">Gunakan tombol ini untuk membawa data localStorage dari browser ke backend saat migrasi.</p>
+<button class="btn primary" onclick="exportData()">Export JSON</button>
+<a class="btn light" href="admin.html">← Dashboard Admin</a>
+</div>
+</main>
+<script>
+const keys=['dsbimbel_pendaftar_v3','dsbimbel_tutors_v4','dsbimbel_schedule_v4','dsbimbel_payments_v4','dsbimbel_absensi_v7'];
+function exportData(){
+ const out={exported_at:new Date().toISOString(),students:JSON.parse(localStorage.getItem(keys[0])||'[]'),tutors:JSON.parse(localStorage.getItem(keys[1])||'[]'),schedules:JSON.parse(localStorage.getItem(keys[2])||'[]'),payments:JSON.parse(localStorage.getItem(keys[3])||'[]'),attendance:JSON.parse(localStorage.getItem(keys[4])||'[]')};
+ const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ds-bimbel-v8-export.json';a.click();URL.revokeObjectURL(a.href);
+}
+</script>
+</body></html>

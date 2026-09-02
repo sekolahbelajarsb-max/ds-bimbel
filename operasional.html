@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ds Bimbel V7 | Operasional</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:#f4f7fb;color:#18233b}
+.wrap{width:min(1150px,92%);margin:auto}.head{background:#071a4a;color:#fff;padding:25px 0}.headbar{display:flex;justify-content:space-between;align-items:center;gap:15px}.brand{font-size:25px;font-weight:900}.brand span{color:#ffc400}.btn{display:inline-block;border:0;border-radius:9px;padding:11px 15px;font-weight:800;cursor:pointer;text-decoration:none}.primary{background:#1356c5;color:#fff}.light{background:#eef4ff;color:#1356c5}.danger{background:#ffeceb;color:#c33125}
+section{padding:30px 0}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.stat{background:#fff;border:1px solid #e1e7f0;border-radius:15px;padding:17px}.stat b{display:block;font-size:27px;color:#1356c5}.panel{background:#fff;border:1px solid #e1e7f0;border-radius:17px;padding:21px;margin-top:17px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{background:#eef4ff;color:#1356c5}.tab.active{background:#1356c5;color:#fff}.view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.field label{display:block;font-size:13px;font-weight:800;margin:9px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid #d7dfeb;border-radius:9px;font:inherit}textarea{min-height:80px}.full{grid-column:1/-1}.table{overflow:auto}table{width:100%;border-collapse:collapse;min-width:800px}th,td{text-align:left;padding:10px;border-bottom:1px solid #edf0f5;font-size:13px}th{background:#f7f9fc}.badge{background:#eaf2ff;color:#1356c5;padding:5px 8px;border-radius:7px;font-weight:800;font-size:11px}.empty{text-align:center;padding:25px;color:#77839a}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.full{grid-column:auto}.headbar{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="head"><div class="wrap headbar"><div><div class="brand">DS <span>BIMBEL</span></div><div>Panel Operasional V7</div></div><div><a class="btn light" href="index.html">← Website</a> <a class="btn danger" href="admin.html">Dashboard Admin</a></div></div></header>
+<main class="wrap">
+<section>
+<div class="cards">
+<div class="stat">Siswa<b id="nSiswa">0</b></div><div class="stat">Tutor<b id="nTutor">0</b></div><div class="stat">Jadwal<b id="nJadwal">0</b></div><div class="stat">Absensi<b id="nAbsensi">0</b></div><div class="stat">Pembayaran<b id="nBayar">0</b></div>
+</div>
+<div class="panel">
+<div class="tabs">
+<button class="btn tab active" onclick="tab('absensi',this)">📝 Absensi</button>
+<button class="btn tab" onclick="tab('siswa',this)">👨‍🎓 Siswa</button>
+<button class="btn tab" onclick="tab('laporan',this)">📊 Laporan</button>
+</div>
+</div>
+
+<div id="absensi" class="view active panel">
+<h2>Catat Absensi</h2><p class="muted">Gunakan untuk mencatat kehadiran setiap pertemuan.</p>
+<div class="grid">
+<div class="field"><label>Nama Siswa</label><input id="an" placeholder="Nama siswa"></div>
+<div class="field"><label>Tanggal</label><input id="ad" type="date"></div>
+<div class="field"><label>Program</label><select id="ap"><option>Les Privat</option><option>Kursus Futsal Academy</option><option>Les Renang</option></select></div>
+<div class="field"><label>Status Kehadiran</label><select id="ast"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></div>
+<div class="field full"><label>Catatan</label><textarea id="ac" placeholder="Materi atau catatan pertemuan"></textarea></div>
+</div>
+<button class="btn primary" onclick="addAbsensi()">Simpan Absensi</button>
+<div class="table" style="margin-top:18px"><table><thead><tr><th>Siswa</th><th>Tanggal</th><th>Program</th><th>Status</th><th>Catatan</th><th>Aksi</th></tr></thead><tbody id="absRows"></tbody></table></div>
+</div>
+
+<div id="siswa" class="view panel">
+<h2>Ringkasan Siswa</h2><p class="muted">Data pendaftar yang masuk dari website.</p>
+<div class="table"><table><thead><tr><th>Nama</th><th>Orang Tua</th><th>Program</th><th>Jenjang/Usia</th><th>Area</th><th>WhatsApp</th></tr></thead><tbody id="sisRows"></tbody></table></div>
+</div>
+
+<div id="laporan" class="view panel">
+<h2>Laporan Operasional</h2><div class="grid">
+<div><label>Periode</label><select id="period"><option>Bulan berjalan</option><option>Semua data</option></select></div>
+<div><label>Program</label><select id="reportProgram"><option>Semua Program</option><option>Les Privat</option><option>Kursus Futsal Academy</option><option>Les Renang</option></select></div>
+</div>
+<div id="report" style="margin-top:18px"></div>
+</div>
+</section>
+</main>
+<script>
+const K={siswa:'dsbimbel_pendaftar_v3',tutor:'dsbimbel_tutors_v4',jadwal:'dsbimbel_schedule_v4',bayar:'dsbimbel_payments_v4',abs:'dsbimbel_absensi_v7'};
+const get=k=>JSON.parse(localStorage.getItem(K[k])||'[]'), put=(k,v)=>localStorage.setItem(K[k],JSON.stringify(v));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function tab(id,b){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');render()}
+function addAbsensi(){let a=get('abs');a.push({nama:an.value,tanggal:ad.value,program:ap.value,status:ast.value,catatan:ac.value});put('abs',a);an.value='';ac.value='';render()}
+function removeAbs(i){let a=get('abs');a.splice(i,1);put('abs',a);render()}
+function render(){let s=get('siswa'),t=get('tutor'),j=get('jadwal'),a=get('abs'),p=get('bayar');nSiswa.textContent=s.length;nTutor.textContent=t.length;nJadwal.textContent=j.length;nAbsensi.textContent=a.length;nBayar.textContent=p.length;
+sisRows.innerHTML=s.length?s.map(x=>`<tr><td><b>${esc(x.nama)}</b></td><td>${esc(x.ortu)}</td><td><span class="badge">${esc(x.program)}</span></td><td>${esc(x.jenjang)}</td><td>${esc(x.area)}</td><td>${esc(x.wa)}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada data.</td></tr>';
+absRows.innerHTML=a.length?a.slice().reverse().map((x,i)=>`<tr><td>${esc(x.nama)}</td><td>${esc(x.tanggal)}</td><td>${esc(x.program)}</td><td>${esc(x.status)}</td><td>${esc(x.catatan)}</td><td><button class="btn danger" onclick="removeAbs(${a.length-1-i})">Hapus</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada absensi.</td></tr>';
+let total=p.reduce((n,x)=>n+Number(x.nominal||0),0), lunas=p.filter(x=>x.status==='Lunas').reduce((n,x)=>n+Number(x.nominal||0),0), hadir=a.filter(x=>x.status==='Hadir').length;
+report.innerHTML=`<div class="grid"><div class="panel"><b>Total pembayaran tercatat</b><h2>Rp${total.toLocaleString('id-ID')}</h2></div><div class="panel"><b>Total pembayaran lunas</b><h2>Rp${lunas.toLocaleString('id-ID')}</h2></div><div class="panel"><b>Total kehadiran</b><h2>${hadir}</h2></div><div class="panel"><b>Total absensi</b><h2>${a.length}</h2></div></div>`;
+}
+render();
+</script>
+</body></html>
