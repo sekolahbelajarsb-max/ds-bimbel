@@ -1,1 +1,1 @@
-{"name":"ds-bimbel-v35","version":"35.0.0","private":true,"scripts":{"start":"node server/server.js"},"engines":{"node":">=20"},"dependencies":{"express":"^5.1.0","pg":"^8.16.3"}}
+{"name":"ds-bimbel-v36","version":"36.0.0","private":true,"scripts":{"start":"node server/server.js"},"engines":{"node":">=20"},"dependencies":{"express":"^5.1.0","pg":"^8.16.3"}}

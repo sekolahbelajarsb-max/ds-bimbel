@@ -1,4 +1,4 @@
-# Ds Bimbel V35 — Supabase + Vercel
+# Ds Bimbel V36 — Supabase + Vercel
 
 Versi ini mempertahankan tampilan/fitur V34 dan menambahkan konfigurasi deployment serverless untuk Vercel + Supabase PostgreSQL.
 
@@ -9,7 +9,7 @@ Versi ini mempertahankan tampilan/fitur V34 dan menambahkan konfigurasi deployme
 - `SESSION_SECRET` = random secret panjang (disarankan).
 
 ## Deploy
-1. Upload/replace seluruh isi V35 ke repository GitHub.
+1. Upload/replace seluruh isi V36 ke repository GitHub.
 2. Import repository ke Vercel.
 3. Tambahkan environment variables di Vercel.
 4. Deploy. Database akan diinisialisasi otomatis saat aplikasi pertama kali membutuhkan koneksi database.

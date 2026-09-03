@@ -65,7 +65,7 @@ app.get(/.*/,(req,res)=>res.sendFile(path.join(publicDir,'index.html')));
 
 if(require.main===module){
   app.listen(PORT,HOST,()=>{
-    console.log(`\nDs Bimbel V35 aktif.`);
+    console.log(`\nDs Bimbel V36 aktif.`);
     console.log(`Laptop: http://localhost:${PORT}`);
     const nets=os.networkInterfaces();
     for(const [name,items] of Object.entries(nets)){ for(const n of items||[]){ if(n.family==='IPv4' && !n.internal) console.log(`HP (Wi-Fi yang sama): http://${n.address}:${PORT}`); }}

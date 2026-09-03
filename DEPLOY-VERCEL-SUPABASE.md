@@ -1,7 +1,7 @@
-# Deploy Ds Bimbel V35 ke Vercel + Supabase
+# Deploy Ds Bimbel V36 ke Vercel + Supabase
 
 ## 1. GitHub
-Pastikan file V35 berada di root repository. File penting: `api/index.js`, `server/server.js`, `server/init-db.js`, dan `config/schema_v27.sql`.
+Pastikan file V36 berada di root repository. File penting: `api/index.js`, `server/server.js`, `server/init-db.js`, dan `config/schema_v27.sql`.
 
 ## 2. Vercel
 Import repository `ds-bimbel`. Vercel mendukung Express dengan konfigurasi minimal/zero configuration.
