@@ -47,7 +47,7 @@ html,body{min-height:100%;color:#18233b!important}body{overflow-x:hidden}h1,h2,h
 <div id="mobileOverlay" onclick="closeMobileMenu()"></div><div id="login" class="login"><div class="box"><div class="logo">DS <span>BIMBEL</span></div><h2>Admin Ds Bimbel V41</h2><p class="muted">Login database online atau gunakan mode lokal.</p><div id="loginErr" class="err"></div>
 <label>Username</label><input id="username" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><button class="btn primary" style="width:100%;margin-top:18px" onclick="doLogin()">Masuk</button><button class="btn light" style="width:100%;margin-top:9px" onclick="localLogin()">Masuk Mode Lokal</button><p style="font-size:12px;color:#6c7890;margin-top:12px">Demo lokal: <b>admin</b> / <b>admin123</b></p>
 </div></div>
-<div id="app" class="app"><aside class="side"><h2 style="margin:0">DS BIMBEL</h2><small>ADMIN V41</small><div class="menu">
+<div id="app" class="app"><aside class="side"><h2 style="margin:0">DS BIMBEL</h2><small>ADMIN V42</small><div class="menu">
 <button class="active" onclick="tab('dashboard',this)">📊 Dashboard</button><button onclick="tab('registrations',this)">📥 Pendaftar</button><button onclick="tab('students',this)">👨‍🎓 Siswa</button><button onclick="tab('tutors',this)">👨‍🏫 Tutor</button><button onclick="tab('schedules',this)">📅 Jadwal</button><button onclick="tab('attendance',this)">📝 Absensi</button><button onclick="tab('payments',this)">💳 Pembayaran</button><button onclick="tab('billing',this)">🧾 Tagihan</button><button onclick="tab('notifications',this)">📱 Notifikasi</button><button onclick="tab('reports',this)">📈 Laporan</button><button onclick="tab('settings',this)">⚙️ Pengaturan</button>
 </div><button class="btn danger" style="width:100%;margin-top:25px" onclick="logout()">Keluar</button></aside>
 <main class="main"><div class="top"><button class="mobile-toggle" type="button" onclick="toggleMobileMenu()" aria-label="Buka menu">☰</button><div><h1 id="heading" style="margin:0">Dashboard</h1><p class="muted" style="margin:3px 0">Ds Bimbel — Jl. Kenangan, Komp. Bumi Rawang Permai, Rawang, Padang Selatan, Kota Padang, Sumatera Barat</p></div><a class="btn light" href="index.html">← Website</a></div>
@@ -108,6 +108,9 @@ async function loadAll(){
  for(const k of Object.keys(cache)){try{cache[k]=await api('/'+k)}catch{cache[k]=[]}}
  if(localMode){
  const raw=JSON.parse(localStorage.getItem('dsbimbel_pendaftar_v3')||'[]');
+ let rawChanged=false;
+ raw.forEach((x,i)=>{if(!x.id){x.id='L'+(i+1);rawChanged=true;}});
+ if(rawChanged)localStorage.setItem('dsbimbel_pendaftar_v3',JSON.stringify(raw));
  cache.registrations=raw.map((x,i)=>({id:x.id||('L'+(i+1)),name:x.nama||x.name||'',parent_name:x.ortu||x.parent_name||'',whatsapp:x.wa||x.whatsapp||'',program:x.program||'',level_or_age:x.jenjang||x.level_or_age||x.education_level||'',area:x.area||'',notes:x.catatan||x.notes||'',address:x.alamat||x.address||'',gender:x.gender||x.jenis_kelamin||'',school:x.school||x.asal_sekolah||'',education_level:x.education_level||x.jenjang||'',class_name:x.kelas||x.class_name||'',private_package:x.paket||x.private_package||'',private_days:x.private_days||x.jadwal_hari_privat||'',private_time:x.private_time||x.pukul||'',status:x.status||'Pendaftar',created_at:x.waktu||x.created_at}));
  cache.students=JSON.parse(localStorage.getItem('dsbimbel_students')||'[]');
  for(const k of ['tutors','schedules','attendance','payments']) cache[k]=JSON.parse(localStorage.getItem('dsbimbel_'+k)||'[]');
@@ -146,8 +149,8 @@ async function convertRegistration(id,button){
   if(localMode){
    const reg=(cache.registrations||[]).find(x=>String(x.id)===String(id)); if(!reg) throw new Error('Pendaftar tidak ditemukan.');
    const students=JSON.parse(localStorage.getItem('dsbimbel_students')||'[]');
-   let st=students.find(x=>String(x.whatsapp||'')===String(reg.whatsapp||'')&&String(x.name||'').toLowerCase()===String(reg.name||'').toLowerCase());
-   const data={name:reg.name,parent_name:reg.parent_name||'',whatsapp:reg.whatsapp||'',program:reg.program||'Les Privat',level_or_age:reg.education_level||reg.level_or_age||'',area:reg.area||'',notes:reg.notes||'',address:reg.address||'',gender:reg.gender||'',school:reg.school||'',education_level:reg.education_level||reg.level_or_age||'',class_name:reg.class_name||'',private_package:reg.private_package||'',private_days:reg.private_days||'',private_time:reg.private_time||'',status:'Aktif'};
+   let st=students.find(x=>String(x.source_registration_id||'')===String(id));
+   const data={name:reg.name,parent_name:reg.parent_name||'',whatsapp:reg.whatsapp||'',program:reg.program||'Les Privat',level_or_age:reg.education_level||reg.level_or_age||'',area:reg.area||'',notes:reg.notes||'',address:reg.address||'',gender:reg.gender||'',school:reg.school||'',education_level:reg.education_level||reg.level_or_age||'',class_name:reg.class_name||'',private_package:reg.private_package||'',private_days:reg.private_days||'',private_time:reg.private_time||'',status:'Aktif',source_registration_id:id};
    if(st) st={...st,...data}; else {st={id:'L'+Date.now(),created_at:new Date().toISOString(),...data};students.unshift(st);}
    localStorage.setItem('dsbimbel_students',JSON.stringify(students));
    const raw=JSON.parse(localStorage.getItem('dsbimbel_pendaftar_v3')||'[]'); const ri=raw.findIndex(x=>String(x.id)===String(id)); if(ri>=0) raw[ri].status='Aktif'; localStorage.setItem('dsbimbel_pendaftar_v3',JSON.stringify(raw)); toast('✓ Pendaftar berhasil menjadi siswa aktif.'); await loadAll(); tab('students',document.querySelector('.menu button:nth-child(3)')); return;

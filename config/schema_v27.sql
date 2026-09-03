@@ -26,3 +26,7 @@ alter table students add column if not exists private_package text default '';
 alter table students add column if not exists private_days text default '';
 alter table students add column if not exists private_time text default '';
 
+
+-- V42: one student per registration; prevents duplicate registrations from merging
+alter table students add column if not exists source_registration_id bigint;
+create unique index if not exists idx_students_source_registration on students(source_registration_id) where source_registration_id is not null;
