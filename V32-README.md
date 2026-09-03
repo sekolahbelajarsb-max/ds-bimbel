@@ -1,6 +1,6 @@
-# Ds Bimbel V33 — HP, Laptop & Online Ready
+# Ds Bimbel V34 — HP, Laptop & Online Ready
 
-V33 melanjutkan V31 tanpa mengulang desain. Paket ini dibuat agar website dapat digunakan dari laptop/PC dan diakses HP melalui jaringan Wi-Fi yang sama, serta siap dideploy online.
+V34 melanjutkan V31 tanpa mengulang desain. Paket ini dibuat agar website dapat digunakan dari laptop/PC dan diakses HP melalui jaringan Wi-Fi yang sama, serta siap dideploy online.
 
 ### Login lokal
 - Username: `admin`
