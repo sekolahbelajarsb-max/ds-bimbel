@@ -44,10 +44,10 @@ html,body{min-height:100%;color:#18233b!important}body{overflow-x:hidden}h1,h2,h
 }
 @media(min-width:651px){#mobileOverlay{display:none!important}.mobile-toggle{display:none!important}}
 </style></head><body>
-<div id="mobileOverlay" onclick="closeMobileMenu()"></div><div id="login" class="login"><div class="box"><div class="logo">DS <span>BIMBEL</span></div><h2>Admin Ds Bimbel V44</h2><p class="muted">Login database online. Mode lokal hanya untuk pengujian jika diizinkan.</p><div id="loginErr" class="err"></div>
+<div id="mobileOverlay" onclick="closeMobileMenu()"></div><div id="login" class="login"><div class="box"><div class="logo">DS <span>BIMBEL</span></div><h2>Admin Ds Bimbel V45</h2><p class="muted">Login database online. Mode lokal hanya untuk pengujian jika diizinkan.</p><div id="loginErr" class="err"></div>
 <label>Username</label><input id="username" autocomplete="username"><label>Password</label><input id="password" type="password" autocomplete="current-password"><button class="btn primary" style="width:100%;margin-top:18px" onclick="doLogin()">Masuk</button><button class="btn light" style="width:100%;margin-top:9px" onclick="localLogin()">Masuk Mode Lokal</button><p style="font-size:12px;color:#6c7890;margin-top:12px">Demo lokal: <b>admin</b> / <b>admin123</b></p>
 </div></div>
-<div id="app" class="app"><aside class="side"><h2 style="margin:0">DS BIMBEL</h2><small>ADMIN V44</small><div class="menu">
+<div id="app" class="app"><aside class="side"><h2 style="margin:0">DS BIMBEL</h2><small>ADMIN V45</small><div class="menu">
 <button class="active" onclick="tab('dashboard',this)">📊 Dashboard</button><button onclick="tab('registrations',this)">📥 Pendaftar</button><button onclick="tab('students',this)">👨‍🎓 Siswa</button><button onclick="tab('tutors',this)">👨‍🏫 Tutor</button><button onclick="tab('schedules',this)">📅 Jadwal</button><button onclick="tab('attendance',this)">📝 Absensi</button><button onclick="tab('payments',this)">💳 Pembayaran</button><button onclick="tab('billing',this)">🧾 Tagihan</button><button onclick="tab('notifications',this)">📱 Notifikasi</button><button onclick="tab('reports',this)">📈 Laporan</button><button onclick="tab('settings',this)">⚙️ Pengaturan</button>
 </div><button class="btn danger" style="width:100%;margin-top:25px" onclick="logout()">Keluar</button></aside>
 <main class="main"><div class="top"><button class="mobile-toggle" type="button" onclick="toggleMobileMenu()" aria-label="Buka menu">☰</button><div><h1 id="heading" style="margin:0">Dashboard</h1><p class="muted" style="margin:3px 0">Ds Bimbel — Jl. Kenangan, Komp. Bumi Rawang Permai, Rawang, Padang Selatan, Kota Padang, Sumatera Barat</p></div><a class="btn light" href="index.html">← Website</a></div>
@@ -62,7 +62,7 @@ html,body{min-height:100%;color:#18233b!important}body{overflow-x:hidden}h1,h2,h
 <div><label>Area</label><input id="stArea" placeholder="Padang / Bukittinggi / area"></div><div><label>Status</label><select id="stStatus"><option>Aktif</option><option>Nonaktif</option></select></div><div><label>Catatan</label><input id="stNotes" placeholder="Catatan siswa"></div>
 </div><div style="margin-top:15px"><button class="btn primary" onclick="saveStudentForm()">💾 Simpan Siswa</button> <button class="btn light" onclick="resetStudentForm();document.getElementById('studentFormPanel').classList.add('hidden')">Batal</button></div></div>
 <div class="toolbar"><input id="studentSearch" placeholder="Cari nama / sekolah / WA / program..." oninput="renderStudents()" style="max-width:420px"><select id="studentStatusFilter" onchange="renderStudents()" style="max-width:180px"><option value="all">Semua Status</option><option>Aktif</option><option>Nonaktif</option></select><button class="btn light" onclick="loadAll()">↻ Refresh</button></div><div class="table"><table><thead><tr><th>ID</th><th>Nama Siswa</th><th>Alamat</th><th>JK</th><th>Sekolah</th><th>Jenjang</th><th>Kelas</th><th>Paket</th><th>Hari</th><th>Pukul</th><th>WhatsApp</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="studentRows"></tbody></table></div></div></section>
-<section id="studentDetail" class="hidden"><div class="panel"><button class="btn light" onclick="tab('students',document.querySelector('.menu button:nth-child(2)'))">← Kembali</button><div id="profile"></div></div></section>
+<section id="studentDetail" class="hidden"><div class="panel"><button class="btn light" onclick="tab('students',document.querySelector('.menu button:nth-child(3)'))">← Kembali</button><div id="profile"></div></div></section>
 <section id="tutors" class="hidden"><div class="panel"><h2>Tambah Tutor</h2><div class="grid"><div><label>Nama</label><input id="tName"></div><div><label>Keahlian</label><input id="tSkill"></div><div><label>WhatsApp</label><input id="tWa"></div><div><label>Status</label><select id="tStatus"><option>Aktif</option><option>Nonaktif</option></select></div></div><button class="btn primary" style="margin-top:15px" onclick="addTutor()">Simpan</button></div><div class="panel"><h2>Data Tutor</h2><div class="table"><table><thead><tr><th>ID</th><th>Nama</th><th>Keahlian</th><th>WhatsApp</th><th>Status</th><th></th></tr></thead><tbody id="tutorRows"></tbody></table></div></div></section>
 <section id="schedules" class="hidden"><div class="panel"><h2>📅 Jadwal & Penugasan</h2><p class="muted">Pilih siswa dan tutor langsung dari daftar. Setelah tersimpan, jadwal muncul di kalender mingguan dan profil siswa.</p><div class="grid"><div><label>Siswa</label><select id="sStudent"><option value="">Pilih siswa aktif...</option></select></div><div><label>Tutor</label><select id="sTutor"><option value="">Pilih tutor...</option></select></div><div><label>Program</label><select id="sProgram"><option>Les Privat</option><option>Kursus Futsal Academy</option><option>Les Renang</option></select></div><div><label>Tanggal</label><input id="sDate" type="date"></div><div><label>Jam</label><input id="sTime" type="time"></div><div><label>Status</label><select id="sStatus"><option>Terjadwal</option><option>Selesai</option><option>Dibatalkan</option></select></div><div style="grid-column:1/-1"><label>Catatan</label><input id="sNotes" placeholder="Lokasi, paket, atau catatan tutor"></div></div><button class="btn primary" style="margin-top:15px" onclick="addSchedule()">+ Simpan Jadwal</button></div><div class="panel"><h2>📆 Jadwal 7 Hari Terdekat</h2><div id="upcomingSchedules" class="cards" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"></div></div><div class="panel"><div class="toolbar"><h2 style="margin:0">🗓️ Kalender Mingguan</h2><button class="btn light" onclick="shiftWeek(-7)">← Minggu Sebelumnya</button><button class="btn light" onclick="shiftWeek(7)">Minggu Berikutnya →</button></div><p id="weekLabel" class="muted"></p><div id="weekCalendar" class="week-calendar"></div></div><div class="panel"><h2>Data Jadwal</h2><div class="table"><table><thead><tr><th>ID</th><th>Siswa</th><th>Tutor</th><th>Program</th><th>Tanggal</th><th>Jam</th><th>Status</th><th></th></tr></thead><tbody id="scheduleRows"></tbody></table></div></div></section>
 <section id="attendance" class="hidden"><div class="panel"><h2>📝 Absensi dari Jadwal</h2><p class="muted">Pilih jadwal yang sudah berlangsung. Data siswa, tutor, dan tanggal terisi otomatis.</p><div class="grid"><div style="grid-column:1/-1"><label>Jadwal</label><select id="aSchedule" onchange="syncAttendanceForm()"><option value="">Pilih jadwal...</option></select></div><div><label>Siswa</label><input id="aStudentName" disabled></div><div><label>Tanggal</label><input id="aDate" type="date"></div><div><label>Status</label><select id="aStatus"><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></div><div><label>Tutor</label><input id="aTutorName" disabled></div><div style="grid-column:1/-1"><label>Catatan</label><input id="aNotes" placeholder="Catatan kehadiran..."></div></div><button class="btn primary" style="margin-top:15px" onclick="addAttendance()">✓ Simpan Absensi</button></div><div class="panel"><h2>📊 Rekap Kehadiran</h2><div class="toolbar"><select id="attStudentFilter" onchange="renderAttendance()"><option value="all">Semua siswa</option></select><select id="attStatusFilter" onchange="renderAttendance()"><option value="all">Semua status</option><option>Hadir</option><option>Izin</option><option>Sakit</option><option>Alpa</option></select></div><div id="attendanceSummary" class="cards"></div></div><div class="panel"><h2>Riwayat Absensi</h2><div class="table"><table><thead><tr><th>ID</th><th>Siswa</th><th>Tanggal</th><th>Status</th><th>Catatan</th><th></th></tr></thead><tbody id="attendanceRows"></tbody></table></div></div></section>
@@ -195,55 +195,47 @@ async function detail(id){
  try{
   let d;
   if(localMode){
-   const students=cache.students||[];
-   const st=students.find(x=>String(x.id)===String(id));
+   const st=(cache.students||[]).find(x=>String(x.id)===String(id));
    if(!st){toast('Siswa tidak ditemukan.');return}
-   d={
-    student:st,
-    schedules:(cache.schedules||[]).filter(x=>String(x.student_id)===String(id)),
-    attendance:(cache.attendance||[]).filter(x=>String(x.student_id)===String(id)),
-    payments:(cache.payments||[]).filter(x=>String(x.student_id)===String(id))
-   };
+   d={student:st,schedules:(cache.schedules||[]).filter(x=>String(x.student_id)===String(id)),attendance:(cache.attendance||[]).filter(x=>String(x.student_id)===String(id)),payments:(cache.payments||[]).filter(x=>String(x.student_id)===String(id))};
   }else{
-   d=await api('/students/'+id);
+   d=await api('/students/'+encodeURIComponent(id)+'/profile');
   }
   const st=d.student||{};
-  const wa=normalizeWa(st.whatsapp||'');
-  const hadir=(d.attendance||[]).filter(x=>x.status==='Hadir').length;
-  const totalAbs=(d.attendance||[]).length;
-  const paid=(d.payments||[]).filter(x=>x.status==='Lunas').reduce((n,x)=>n+Number(x.amount||0),0);
-  const unpaid=(d.payments||[]).filter(x=>x.status!=='Lunas').reduce((n,x)=>n+Number(x.amount||0),0);
-  const msg=`Halo ${st.parent_name||'Orang Tua/Wali'}, kami dari Ds Bimbel.`;
-  const waUrl=wa?`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`:'';
+  const schedules=d.schedules||[], attendance=d.attendance||[], payments=d.payments||[];
+  const hadir=attendance.filter(x=>x.status==='Hadir').length, totalAbs=attendance.length;
+  const paid=payments.filter(x=>x.status==='Lunas').reduce((a,x)=>a+Number(x.amount||0),0);
+  const unpaid=payments.filter(x=>x.status!=='Lunas').reduce((a,x)=>a+Number(x.amount||0),0);
+  const wa=normalizeWa(st.whatsapp), waUrl=wa?'https://wa.me/'+wa+'?text='+encodeURIComponent('Halo '+(st.parent_name||'Bapak/Ibu')+', kami dari Ds Bimbel.'):'#';
+  const rows=(items,fields)=>items.length?'<div class="table"><table><thead><tr>'+fields.map(f=>'<th>'+esc(f.replaceAll('_',' '))+'</th>').join('')+'</tr></thead><tbody>'+items.map(x=>'<tr>'+fields.map(f=>'<td>'+esc(f==='amount'?'Rp'+Number(x[f]||0).toLocaleString('id-ID'):(x[f]??'-'))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty">Belum ada data.</div>';
   profile.innerHTML=`
-   <div class="toolbar" style="justify-content:space-between;align-items:flex-start;gap:12px">
-    <div>
-     <h2 style="margin:0">${esc(st.name||'-')}</h2>
-     <p class="muted" style="margin:5px 0">${esc(st.program||'-')} · ${esc(st.level_or_age||'-')}</p>
-    </div>
-    <div>${wa?`<a class="btn primary" href="${waUrl}" target="_blank" rel="noopener">📲 WhatsApp Orang Tua</a>`:''}
-    <button class="btn light" onclick="tab('students',document.querySelector('.menu button:nth-child(3)'))">← Kembali</button></div>
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0">
+    <div><h2 style="margin:0">👨‍🎓 ${esc(st.name||'Profil Siswa')}</h2><p class="muted" style="margin:5px 0">ID Siswa: ${esc(st.id||'-')}</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" type="button" onclick="editStudent(${JSON.stringify(st.id)})">✏️ Edit Data</button>${wa?`<a class="btn primary" target="_blank" rel="noopener" href="${waUrl}">📲 WhatsApp</a>`:''}</div>
    </div>
    <div class="cards" style="grid-template-columns:repeat(4,1fr)">
-    <div class="stat">Jadwal<b>${(d.schedules||[]).length}</b></div>
+    <div class="stat">Jadwal<b>${schedules.length}</b></div>
     <div class="stat">Kehadiran<b>${hadir}/${totalAbs}</b></div>
     <div class="stat">Sudah Dibayar<b>Rp${paid.toLocaleString('id-ID')}</b></div>
     <div class="stat">Tunggakan<b>Rp${unpaid.toLocaleString('id-ID')}</b></div>
    </div>
    <div class="profile">
-    <div class="panel"><h3>👤 Data Siswa</h3>
-     <p><b>Nama:</b> ${esc(st.name||'-')}</p><p><b>Program:</b> ${esc(st.program||'-')}</p>
-     <p><b>Jenjang/Usia:</b> ${esc(st.level_or_age||'-')}</p><p><b>Status:</b> <span class="badge">${esc(st.status||'-')}</span></p>
-     <p><b>Area:</b> ${esc(st.area||'-')}</p><p><b>Catatan:</b> ${esc(st.notes||'-')}</p>
+    <div class="panel"><h3>👤 Identitas Siswa</h3>
+     <p><b>Nama:</b> ${esc(st.name||'-')}</p><p><b>Jenis Kelamin:</b> ${esc(st.gender||'-')}</p><p><b>Alamat:</b> ${esc(st.address||'-')}</p><p><b>Area:</b> ${esc(st.area||'-')}</p><p><b>Status:</b> <span class="badge">${esc(st.status||'-')}</span></p>
+    </div>
+    <div class="panel"><h3>🏫 Pendidikan</h3>
+     <p><b>Asal Sekolah:</b> ${esc(st.school||'-')}</p><p><b>Jenjang:</b> ${esc(st.education_level||st.level_or_age||'-')}</p><p><b>Kelas:</b> ${esc(st.class_name||'-')}</p><p><b>Program:</b> ${esc(st.program||'-')}</p>
+    </div>
+    <div class="panel"><h3>📚 Paket & Jadwal Privat</h3>
+     <p><b>Paket:</b> ${esc(st.private_package||st.program||'-')}</p><p><b>Hari:</b> ${esc(st.private_days||'-')}</p><p><b>Pukul:</b> ${esc(st.private_time||'-')}</p><p><b>Catatan:</b> ${esc(st.notes||'-')}</p>
     </div>
     <div class="panel"><h3>👨‍👩‍👧 Orang Tua / Wali</h3>
-     <p><b>Nama:</b> ${esc(st.parent_name||'-')}</p><p><b>WhatsApp:</b> ${esc(st.whatsapp||'-')}</p>
-     <p><b>Kontak cepat:</b> ${wa?`<a href="${waUrl}" target="_blank" rel="noopener">Buka WhatsApp</a>`:'Nomor belum tersedia'}</p>
+     <p><b>Nama:</b> ${esc(st.parent_name||'-')}</p><p><b>WhatsApp:</b> ${esc(st.whatsapp||'-')}</p><p><b>Kontak:</b> ${wa?`<a href="${waUrl}" target="_blank" rel="noopener">Buka WhatsApp</a>`:'Nomor belum tersedia'}</p>
     </div>
    </div>
-   <div class="panel"><h3>📅 Riwayat Jadwal</h3>${rows(d.schedules||[],['program','schedule_date','schedule_time','status'])}</div>
-   <div class="panel"><h3>📝 Riwayat Absensi</h3>${rows(d.attendance||[],['attendance_date','status','notes'])}</div>
-   <div class="panel"><h3>💳 Riwayat Tagihan & Pembayaran</h3>${rows(d.payments||[],['billing_month','payment_date','amount','due_date','status'])}</div>`;
+   <div class="panel"><h3>📅 Riwayat Jadwal</h3>${rows(schedules,['program','schedule_date','schedule_time','status'])}</div>
+   <div class="panel"><h3>📝 Riwayat Absensi</h3>${rows(attendance,['attendance_date','status','notes'])}</div>
+   <div class="panel"><h3>💳 Riwayat Tagihan & Pembayaran</h3>${rows(payments,['billing_month','payment_date','amount','due_date','status'])}</div>`;
   tab('studentDetail');
  }catch(e){toast(e.message||'Gagal membuka profil siswa.')}
 }
