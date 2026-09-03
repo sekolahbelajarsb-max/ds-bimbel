@@ -1,8 +1,8 @@
-# Ds Bimbel V38
+# Ds Bimbel V39
 
-Penyempurnaan V38 tanpa mengubah desain utama.
+Penyempurnaan V39 tanpa mengubah desain utama.
 
-## Fitur V38
+## Fitur V39
 - Dashboard memakai jumlah pendaftar dari tabel registrations.
 - Alur pendaftar: Pendaftar → Dihubungi → Jadikan Siswa Aktif.
 - Pendaftar dapat dikonversi menjadi siswa dengan satu tombol.
@@ -13,4 +13,4 @@ Penyempurnaan V38 tanpa mengubah desain utama.
 - Tetap kompatibel dengan Supabase + Vercel.
 
 ## Deployment
-Upload isi V38 ke repository GitHub yang digunakan Vercel, commit, lalu tunggu deployment otomatis sampai Ready.
+Upload isi V39 ke repository GitHub yang digunakan Vercel, commit, lalu tunggu deployment otomatis sampai Ready.

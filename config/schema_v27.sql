@@ -7,3 +7,22 @@ create table if not exists registrations(id bigserial primary key,name text not 
 create index if not exists idx_schedules_date on schedules(schedule_date);create index if not exists idx_payments_month on payments(billing_month);create index if not exists idx_students_status on students(status);
 
 create index if not exists idx_registrations_status on registrations(status);
+
+-- V39 registration fields (backward-compatible migration)
+alter table registrations add column if not exists address text default '';
+alter table registrations add column if not exists gender text default '';
+alter table registrations add column if not exists school text default '';
+alter table registrations add column if not exists education_level text default '';
+alter table registrations add column if not exists class_name text default '';
+alter table registrations add column if not exists private_package text default '';
+alter table registrations add column if not exists private_days text default '';
+alter table registrations add column if not exists private_time text default '';
+alter table students add column if not exists address text default '';
+alter table students add column if not exists gender text default '';
+alter table students add column if not exists school text default '';
+alter table students add column if not exists education_level text default '';
+alter table students add column if not exists class_name text default '';
+alter table students add column if not exists private_package text default '';
+alter table students add column if not exists private_days text default '';
+alter table students add column if not exists private_time text default '';
+
