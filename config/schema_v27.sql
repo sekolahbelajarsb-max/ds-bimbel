@@ -5,3 +5,5 @@ create table if not exists attendance(id bigserial primary key,student_id bigint
 create table if not exists payments(id bigserial primary key,student_id bigint references students(id) on delete cascade,amount numeric(14,2) not null,payment_date date,billing_month text,due_date date,status text default 'Belum Lunas',program text default '',notes text default '',paid_at timestamptz,created_at timestamptz default now());
 create table if not exists registrations(id bigserial primary key,name text not null,parent_name text default '',whatsapp text default '',program text default '',level_or_age text default '',area text default '',notes text default '',status text default 'Pendaftar',created_at timestamptz default now());
 create index if not exists idx_schedules_date on schedules(schedule_date);create index if not exists idx_payments_month on payments(billing_month);create index if not exists idx_students_status on students(status);
+
+create index if not exists idx_registrations_status on registrations(status);
