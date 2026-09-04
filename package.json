@@ -1,6 +1,6 @@
 {
-  "name": "ds-bimbel-v43",
-  "version": "45.0.0",
+  "name": "ds-bimbel-v46",
+  "version": "46.0.0",
   "private": true,
   "scripts": {
     "start": "node server/server.js"

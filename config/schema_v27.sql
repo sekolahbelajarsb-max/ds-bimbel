@@ -30,3 +30,9 @@ alter table students add column if not exists private_time text default '';
 -- V42: one student per registration; prevents duplicate registrations from merging
 alter table students add column if not exists source_registration_id bigint;
 create unique index if not exists idx_students_source_registration on students(source_registration_id) where source_registration_id is not null;
+
+-- V46: student profile enhancements
+alter table students add column if not exists photo_url text default '';
+alter table students add column if not exists parent_whatsapp text default '';
+alter table students add column if not exists birth_date date;
+alter table students add column if not exists development_notes text default '';
