@@ -13,13 +13,55 @@ const ALLOW_LOCAL_MODE=String(process.env.ALLOW_LOCAL_MODE||'true').toLowerCase(
 const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATABASE_URL,max:1,idleTimeoutMillis:10000,connectionTimeoutMillis:10000,ssl:process.env.NODE_ENV==='production'?{rejectUnauthorized:false}:false}):null;
 const schemaPath=path.resolve(__dirname,'../config/schema_v27.sql');
 let schemaReady=null;
+
+// V49: split SQL safely. PostgreSQL treats semicolons in comments and quoted
+// strings differently from statement terminators, so a raw sql.split(';') is unsafe.
+function splitSqlStatements(sql){
+  const out=[]; let buf=''; let quote=null; let dollarTag=null; let lineComment=false; let blockComment=false;
+  for(let i=0;i<sql.length;i++){
+    const c=sql[i], n=sql[i+1];
+    if(lineComment){buf+=c;if(c==='\n')lineComment=false;continue;}
+    if(blockComment){buf+=c;if(c==='*'&&n==='/'){buf+=n;i++;blockComment=false;}continue;}
+    if(!quote&&!dollarTag&&c==='-'&&n==='-'){buf+=c+n;i++;lineComment=true;continue;}
+    if(!quote&&!dollarTag&&c==='/'&&n==='*'){buf+=c+n;i++;blockComment=true;continue;}
+    if(dollarTag){
+      if(c==='$'){
+        const rest=sql.slice(i);
+        if(rest.startsWith(dollarTag)){buf+=dollarTag;i+=dollarTag.length-1;dollarTag=null;continue;}
+      }
+      buf+=c;continue;
+    }
+    if(quote){
+      buf+=c;
+      if(c===quote){
+        if(quote==="'"&&n==="'"){buf+=n;i++;continue;}
+        if(quote==='"'&&n==='"'){buf+=n;i++;continue;}
+        quote=null;
+      }
+      continue;
+    }
+    if(c==="'"||c==='"'){quote=c;buf+=c;continue;}
+    if(c==='$'){
+      const m=sql.slice(i).match(/^\$[A-Za-z_][A-Za-z0-9_]*\$|^\$\$/);
+      if(m){dollarTag=m[0];buf+=dollarTag;i+=dollarTag.length-1;continue;}
+    }
+    if(c===';'){if(buf.trim())out.push(buf.trim());buf='';continue;}
+    buf+=c;
+  }
+  if(buf.trim())out.push(buf.trim());
+  return out;
+}
+
 async function ensureSchema(){
   if(!pool) return;
   if(!schemaReady){
     schemaReady=(async()=>{
       const sql=require('fs').readFileSync(schemaPath,'utf8');
-      const statements=sql.split(';').map(x=>x.trim()).filter(Boolean);
-      for(const statement of statements) await pool.query(statement);
+      const statements=splitSqlStatements(sql);
+      for(let i=0;i<statements.length;i++){
+        try{await pool.query(statements[i]);}
+        catch(err){err.message=`Schema statement ${i+1}/${statements.length} failed: ${err.message}`;throw err;}
+      }
     })().catch(err=>{schemaReady=null;throw err});
   }
   await schemaReady;
@@ -32,17 +74,11 @@ function verifyToken(token){try{const [payload,sig]=String(token||'').split('.')
 function getToken(req){return req.headers.authorization?.replace(/^Bearer\s+/,'')||req.headers.cookie?.match(/ds_session=([^;]+)/)?.[1]}
 function auth(req,res,next){const user=verifyToken(getToken(req));if(!user)return res.status(401).json({error:'Belum login'});req.user=user;next()}
 async function q(text,params=[]){if(!pool)throw new Error('DATABASE_URL belum dikonfigurasi');await ensureSchema();return (await pool.query(text,params)).rows}
-app.get('/api/network',async(req,res)=>{
-  const nets=os.networkInterfaces(), addresses=[];
-  for(const [name,items] of Object.entries(nets)){ for(const n of items||[]){ if(n.family==='IPv4' && !n.internal) addresses.push({interface:name,address:n.address,url:`http://${n.address}:${PORT}`}); }}
-  res.json({ok:true,port:PORT,addresses});
-});
+app.get('/api/network',async(req,res)=>{const nets=os.networkInterfaces(), addresses=[];for(const [name,items] of Object.entries(nets)){for(const n of items||[]){if(n.family==='IPv4'&&!n.internal)addresses.push({interface:name,address:n.address,url:`http://${n.address}:${PORT}`});}}res.json({ok:true,port:PORT,addresses});});
 app.get('/api/health',async(req,res)=>{try{if(!pool)return res.status(503).json({ok:false,database:false,configured:false,allowLocalMode:ALLOW_LOCAL_MODE,error:'DATABASE_URL belum dikonfigurasi'});await q('select 1');res.json({ok:true,database:true,configured:true,allowLocalMode:ALLOW_LOCAL_MODE,environment:process.env.NODE_ENV||'development'})}catch(e){res.status(503).json({ok:false,database:false,configured:true,allowLocalMode:ALLOW_LOCAL_MODE,environment:process.env.NODE_ENV||'development',error:String(e.message||e).replace(/postgres(?:ql)?:\/\/[^\s]+/gi,'postgresql://***:***@***')})}});
-app.post('/api/auth/login',(req,res)=>{const {username,password}=req.body||{};if(String(username||'').toLowerCase()!==USER.toLowerCase()||password!==PASS)return res.status(401).json({error:'Username atau password salah'});const token=signToken(USER);const secure=process.env.NODE_ENV==='production'?' Secure;':'';
-res.setHeader('Set-Cookie',`ds_session=${token}; HttpOnly; SameSite=Lax; Path=/;${secure}`);res.json({ok:true,user:{username:USER}})});
+app.post('/api/auth/login',(req,res)=>{const {username,password}=req.body||{};if(String(username||'').toLowerCase()!==USER.toLowerCase()||password!==PASS)return res.status(401).json({error:'Username atau password salah'});const token=signToken(USER);const secure=process.env.NODE_ENV==='production'?' Secure;':'';res.setHeader('Set-Cookie',`ds_session=${token}; HttpOnly; SameSite=Lax; Path=/;${secure}`);res.json({ok:true,user:{username:USER}})});
 app.get('/api/auth/me',auth,(req,res)=>res.json({user:req.user}));
-app.post('/api/auth/logout',auth,(req,res)=>{const secure=process.env.NODE_ENV==='production'?' Secure;':'';
-res.setHeader('Set-Cookie',`ds_session=; Max-Age=0; Path=/;${secure}`);res.json({ok:true})});
+app.post('/api/auth/logout',auth,(req,res)=>{const secure=process.env.NODE_ENV==='production'?' Secure;':'';res.setHeader('Set-Cookie',`ds_session=; Max-Age=0; Path=/;${secure}`);res.json({ok:true})});
 app.post('/api/auth/change-password',auth,(req,res)=>res.status(400).json({error:'Password admin online diatur melalui ADMIN_PASSWORD pada Environment Variables hosting.'}));
 const tables={students:'students',tutors:'tutors',schedules:'schedules',attendance:'attendance',payments:'payments',registrations:'registrations'};
 app.get('/api/:type',auth,async(req,res)=>{const t=tables[req.params.type];if(!t)return res.status(404).json({error:'Endpoint tidak ditemukan'});try{res.json(await q(`select * from ${t} order by id desc`))}catch(e){res.status(500).json({error:e.message})}});
@@ -55,25 +91,18 @@ app.patch('/api/:type/:id',auth,async(req,res)=>{try{const t=tables[req.params.t
 app.delete('/api/:type/:id',auth,async(req,res)=>{try{const t=tables[req.params.type];if(!t)return res.status(404).json({error:'Endpoint tidak ditemukan'});await q(`delete from ${t} where id=$1`,[req.params.id]);res.json({ok:true})}catch(e){res.status(500).json({error:e.message})}});
 app.patch('/api/students/:id/status',auth,async(req,res)=>{try{const r=await q('update students set status=$1 where id=$2 returning *',[req.body.status,req.params.id]);if(!r[0])return res.status(404).json({error:'Siswa tidak ditemukan'});res.json(r[0])}catch(e){res.status(500).json({error:e.message})}});
 app.get('/api/students/:id',auth,async(req,res)=>{try{const s=await q('select * from students where id=$1',[req.params.id]);if(!s[0])return res.status(404).json({error:'Siswa tidak ditemukan'});const [schedules,attendance,payments]=await Promise.all([q('select * from schedules where student_id=$1 order by schedule_date desc',[req.params.id]),q('select * from attendance where student_id=$1 order by attendance_date desc',[req.params.id]),q('select * from payments where student_id=$1 order by payment_date desc',[req.params.id])]);res.json({student:s[0],schedules,attendance,payments})}catch(e){res.status(500).json({error:e.message})}});
+// V49: compatibility endpoint used by the student profile UI.
+app.get('/api/students/:id/profile',auth,async(req,res)=>{try{const s=await q('select * from students where id=$1',[req.params.id]);if(!s[0])return res.status(404).json({error:'Siswa tidak ditemukan'});const [schedules,attendance,payments]=await Promise.all([q('select * from schedules where student_id=$1 order by schedule_date desc',[req.params.id]),q('select * from attendance where student_id=$1 order by attendance_date desc',[req.params.id]),q('select * from payments where student_id=$1 order by payment_date desc',[req.params.id])]);res.json({profile:s[0],student:s[0],schedules,attendance,payments})}catch(e){res.status(500).json({error:e.message})}});
 app.get('/api/reports/summary',auth,async(req,res)=>{try{const r=await q(`select (select count(*) from students where status='Aktif') students,(select count(*) from registrations where status='Pendaftar') registrations,(select count(*) from tutors) tutors,(select count(*) from schedules) schedules,(select count(*) from attendance) attendance,(select count(*) from payments) payments,(select coalesce(sum(amount),0) from payments where status='Lunas') paid_total`);res.json(r[0])}catch(e){res.status(500).json({error:e.message})}});
 app.get('/api/reports/analytics',auth,async(req,res)=>{try{const month=req.query.month||new Date().toISOString().slice(0,7);const [tot,att,prog,inc,tut]=await Promise.all([q(`select count(*) transactions,count(*) filter(where status='Lunas') paid_transactions,coalesce(sum(amount) filter(where status='Lunas'),0) total,coalesce(sum(amount) filter(where status<>'Lunas'),0) unpaid_total from payments where to_char(coalesce(payment_date,due_date),'YYYY-MM')=$1`,[month]),q(`select lower(status) status,count(*) n from attendance where to_char(attendance_date,'YYYY-MM')=$1 group by lower(status)`,[month]),q(`select program name,count(*) count from students where status='Aktif' group by program order by count desc`,[]),q(`select to_char(date_trunc('month',payment_date),'YYYY-MM') month,coalesce(sum(amount) filter(where status='Lunas'),0) total from payments where payment_date>=date_trunc('month',current_date)-interval '5 months' group by 1 order by 1`,[]),q(`select t.name,count(s.id) schedules,count(a.id) filter(where a.status='Hadir') hadir,count(a.id) attended from tutors t left join schedules s on s.tutor_id=t.id left join attendance a on a.schedule_id=s.id group by t.id order by t.name`,[])]);const amap={hadir:0,izin:0,sakit:0,alpa:0};att.forEach(x=>amap[x.status]=Number(x.n));const den=Object.values(amap).reduce((a,b)=>a+b,0);amap.rate=den?Math.round(amap.hadir/den*100):0;const active=prog.reduce((a,b)=>a+Number(b.count),0);prog.forEach(x=>x.pct=active?Number(x.count)/active*100:0);tut.forEach(x=>x.rate=Number(x.attended)?Math.round(Number(x.hadir)/Number(x.attended)*100):0);res.json({month,transactions:Number(tot[0].transactions),paid_transactions:Number(tot[0].paid_transactions),total:Number(tot[0].total),unpaid_total:Number(tot[0].unpaid_total),programs:prog,attendance:amap,income:inc.map(x=>({month:x.month,total:Number(x.total)})),tutors:tut})}catch(e){res.status(500).json({error:e.message})}});
 app.get('/api/payments/:id/invoice',auth,async(req,res)=>{try{const r=await q(`select p.*,s.name student_name,s.parent_name,s.program from payments p left join students s on s.id=p.student_id where p.id=$1`,[req.params.id]);if(!r[0])return res.status(404).json({error:'Pembayaran tidak ditemukan'});res.json({invoice:r[0]})}catch(e){res.status(500).json({error:e.message})}});
-app.post('/api/public/registrations',async(req,res)=>{try{const x=req.body||{};const nama=x.nama||x.name||'', ortu=x.ortu||x.parent_name||'', wa=x.wa||x.whatsapp||'', program=(x.program||'Les Privat').replace(/^Kursus Futsal Academy$/i,'Futsal Academy'), jenjang=x.jenjang||x.level_or_age||x.education_level||'', area=x.area||'', catatan=x.catatan||x.notes||'', address=x.address||x.alamat||'', gender=x.gender||x.jenis_kelamin||'', school=x.school||x.asal_sekolah||'', education_level=x.education_level||jenjang||'', class_name=x.class_name||x.kelas||'', private_package=x.private_package||x.paket_privat||'', private_days=x.private_days||x.jadwal_hari_privat||'', private_time=x.private_time||x.pukul||'';if(!nama||!wa)return res.status(400).json({error:'Nama dan Nomor HP/WhatsApp wajib diisi'});const r=await q(`insert into registrations(name,parent_name,whatsapp,program,level_or_age,area,notes,address,gender,school,education_level,class_name,private_package,private_days,private_time,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Pendaftar') returning *`,[nama,ortu,wa,program,jenjang,area,catatan,address,gender,school,education_level,class_name,private_package,private_days,private_time]);res.status(201).json(r[0])}catch(e){res.status(500).json({error:e.message})}});
+app.post('/api/public/registrations',async(req,res)=>{try{const x=req.body||{};const nama=x.nama||x.name||'',ortu=x.ortu||x.parent_name||'',wa=x.wa||x.whatsapp||'',program=(x.program||'Les Privat').replace(/^Kursus Futsal Academy$/i,'Futsal Academy'),jenjang=x.jenjang||x.level_or_age||x.education_level||'',area=x.area||'',catatan=x.catatan||x.notes||'',address=x.address||x.alamat||'',gender=x.gender||x.jenis_kelamin||'',school=x.school||x.asal_sekolah||'',education_level=x.education_level||jenjang||'',class_name=x.class_name||x.kelas||'',private_package=x.private_package||x.paket_privat||'',private_days=x.private_days||x.jadwal_hari_privat||'',private_time=x.private_time||x.pukul||'';if(!nama||!wa)return res.status(400).json({error:'Nama dan Nomor HP/WhatsApp wajib diisi'});const r=await q(`insert into registrations(name,parent_name,whatsapp,program,level_or_age,area,notes,address,gender,school,education_level,class_name,private_package,private_days,private_time,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Pendaftar') returning *`,[nama,ortu,wa,program,jenjang,area,catatan,address,gender,school,education_level,class_name,private_package,private_days,private_time]);res.status(201).json(r[0])}catch(e){res.status(500).json({error:e.message})}});
 app.get('/api/registrations',auth,async(req,res)=>{try{res.json(await q('select * from registrations order by id desc'))}catch(e){res.status(500).json({error:e.message})}});
 app.patch('/api/registrations/:id/status',auth,async(req,res)=>{try{const status=req.body?.status;if(!['Pendaftar','Dihubungi','Ditolak'].includes(status))return res.status(400).json({error:'Status pendaftar tidak valid'});const r=await q('update registrations set status=$1 where id=$2 returning *',[status,req.params.id]);if(!r[0])return res.status(404).json({error:'Pendaftar tidak ditemukan'});res.json(r[0])}catch(e){res.status(500).json({error:e.message})}});
 app.get('/api/registrations/:id/debug',auth,async(req,res)=>{try{const r=await q('select id,name,whatsapp,status from registrations where id=$1',[req.params.id]);res.json({ok:true,found:!!r[0],registration:r[0]||null})}catch(e){res.status(500).json({ok:false,error:e.message})}});
-app.post('/api/registrations/:id/convert',auth,async(req,res)=>{let client=null;try{if(!pool)throw new Error('DATABASE_URL belum dikonfigurasi');await ensureSchema();client=await pool.connect();await client.query('BEGIN');const r=await client.query('select * from registrations where id=$1 for update',[req.params.id]);if(!r.rows[0]){await client.query('ROLLBACK');return res.status(404).json({error:'Pendaftar tidak ditemukan'})}const x=r.rows[0];const exists=await client.query('select * from students where source_registration_id=$1 limit 1',[x.id]);let student=exists.rows[0];if(!student){const a=await client.query(`insert into students(name,parent_name,whatsapp,program,level_or_age,area,notes,address,gender,school,education_level,class_name,private_package,private_days,private_time,status,source_registration_id) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Aktif',$16) returning *`,[x.name,x.parent_name||'',x.whatsapp||'',x.program||'',x.level_or_age||'',x.area||'',x.notes||'',x.address||'',x.gender||'',x.school||'',x.education_level||x.level_or_age||'',x.class_name||'',x.private_package||'',x.private_days||'',x.private_time||'',x.id]);student=a.rows[0]}else{const a=await client.query(`update students set parent_name=$1,whatsapp=$2,program=$3,level_or_age=$4,area=$5,notes=$6,address=$7,gender=$8,school=$9,education_level=$10,class_name=$11,private_package=$12,private_days=$13,private_time=$14,status='Aktif',source_registration_id=$15,photo_url=$16,parent_whatsapp=$17,birth_date=$18,development_notes=$19 where id=$20 returning *`,[x.parent_name||'',x.whatsapp||'',x.program||'',x.level_or_age||'',x.area||'',x.notes||'',x.address||'',x.gender||'',x.school||'',x.education_level||x.level_or_age||'',x.class_name||'',x.private_package||'',x.private_days||'',x.private_time||'',x.photo_url||student.photo_url||'',x.parent_whatsapp||student.parent_whatsapp||'',x.birth_date||student.birth_date||null,x.development_notes||student.development_notes||'',x.id,student.id]);student=a.rows[0]}const updated=await client.query("update registrations set status='Aktif' where id=$1 returning *",[req.params.id]);await client.query('COMMIT');res.json({ok:true,registration:updated.rows[0],student})}catch(e){try{await client?.query('ROLLBACK')}catch{}res.status(500).json({error:e.message})}finally{client?.release()}});
+app.post('/api/registrations/:id/convert',auth,async(req,res)=>{let client=null;try{if(!pool)throw new Error('DATABASE_URL belum dikonfigurasi');await ensureSchema();client=await pool.connect();await client.query('BEGIN');const r=await client.query('select * from registrations where id=$1 for update',[req.params.id]);if(!r.rows[0]){await client.query('ROLLBACK');return res.status(404).json({error:'Pendaftar tidak ditemukan'})}const x=r.rows[0];const exists=await client.query('select * from students where source_registration_id=$1 limit 1',[x.id]);let student=exists.rows[0];if(!student){const a=await client.query(`insert into students(name,parent_name,whatsapp,program,level_or_age,area,notes,address,gender,school,education_level,class_name,private_package,private_days,private_time,status,source_registration_id) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Aktif',$16) returning *`,[x.name,x.parent_name||'',x.whatsapp||'',x.program||'',x.level_or_age||'',x.area||'',x.notes||'',x.address||'',x.gender||'',x.school||'',x.education_level||x.level_or_age||'',x.class_name||'',x.private_package||'',x.private_days||'',x.private_time||'',x.id]);student=a.rows[0]}else{const a=await client.query(`update students set parent_name=$1,whatsapp=$2,program=$3,level_or_age=$4,area=$5,notes=$6,address=$7,gender=$8,school=$9,education_level=$10,class_name=$11,private_package=$12,private_days=$13,private_time=$14,status='Aktif',source_registration_id=$15,photo_url=$16,parent_whatsapp=$17,birth_date=$18,development_notes=$19 where id=$20 returning *`,[x.parent_name||'',x.whatsapp||'',x.program||'',x.level_or_age||'',x.area||'',x.notes||'',x.address||'',x.gender||'',x.school||'',x.education_level||x.level_or_age||'',x.class_name||'',x.private_package||'',x.private_days||'',x.private_time||'',x.id,x.photo_url||student.photo_url||'',x.parent_whatsapp||student.parent_whatsapp||'',x.birth_date||student.birth_date||null,x.development_notes||student.development_notes||'',student.id]);student=a.rows[0]}const updated=await client.query("update registrations set status='Aktif' where id=$1 returning *",[req.params.id]);await client.query('COMMIT');res.json({ok:true,registration:updated.rows[0],student})}catch(e){try{await client?.query('ROLLBACK')}catch{}res.status(500).json({error:e.message})}finally{client?.release()}});
 const publicDir=path.resolve(__dirname,'..');
 app.use(express.static(publicDir));
 app.get(/.*/,(req,res)=>res.sendFile(path.join(publicDir,'index.html')));
-
-if(require.main===module){
-  app.listen(PORT,HOST,()=>{
-    console.log(`\nDs Bimbel V41 aktif.`);
-    console.log(`Laptop: http://localhost:${PORT}`);
-    const nets=os.networkInterfaces();
-    for(const [name,items] of Object.entries(nets)){ for(const n of items||[]){ if(n.family==='IPv4' && !n.internal) console.log(`HP (Wi-Fi yang sama): http://${n.address}:${PORT}`); }}
-    console.log('');
-  });
-}
+if(require.main===module){app.listen(PORT,HOST,()=>{console.log(`\nDs Bimbel V49 aktif.`);console.log(`Laptop: http://localhost:${PORT}`);const nets=os.networkInterfaces();for(const [name,items] of Object.entries(nets)){for(const n of items||[]){if(n.family==='IPv4'&&!n.internal)console.log(`HP (Wi-Fi yang sama): http://${n.address}:${PORT}`);}}console.log('');});}
 module.exports=app;

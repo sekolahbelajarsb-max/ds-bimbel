@@ -5,9 +5,7 @@ create table if not exists attendance(id bigserial primary key,student_id bigint
 create table if not exists payments(id bigserial primary key,student_id bigint references students(id) on delete cascade,amount numeric(14,2) not null,payment_date date,billing_month text,due_date date,status text default 'Belum Lunas',program text default '',notes text default '',paid_at timestamptz,created_at timestamptz default now());
 create table if not exists registrations(id bigserial primary key,name text not null,parent_name text default '',whatsapp text default '',program text default '',level_or_age text default '',area text default '',notes text default '',status text default 'Pendaftar',created_at timestamptz default now());
 create index if not exists idx_schedules_date on schedules(schedule_date);create index if not exists idx_payments_month on payments(billing_month);create index if not exists idx_students_status on students(status);
-
 create index if not exists idx_registrations_status on registrations(status);
-
 -- V39 registration fields (backward-compatible migration)
 alter table registrations add column if not exists address text default '';
 alter table registrations add column if not exists gender text default '';
@@ -25,12 +23,9 @@ alter table students add column if not exists class_name text default '';
 alter table students add column if not exists private_package text default '';
 alter table students add column if not exists private_days text default '';
 alter table students add column if not exists private_time text default '';
-
-
 -- V42: one student per registration; prevents duplicate registrations from merging
 alter table students add column if not exists source_registration_id bigint;
 create unique index if not exists idx_students_source_registration on students(source_registration_id) where source_registration_id is not null;
-
 -- V46: student profile enhancements
 alter table students add column if not exists photo_url text default '';
 alter table students add column if not exists parent_whatsapp text default '';
