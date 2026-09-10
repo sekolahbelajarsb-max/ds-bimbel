@@ -26,6 +26,7 @@ section{padding:78px 0}.section-head{text-align:center;max-width:760px;margin:0 
 .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.price-card{background:#fff;border:1px solid #dfe6f0;border-radius:18px;padding:23px}.price-card.featured{border:2px solid var(--blue);box-shadow:0 14px 35px #1356c51c}.price-card h3{margin:0}.price{font-size:30px;font-weight:900;color:var(--blue);margin:9px 0}.price-card ul{padding:0;margin:13px 0 18px;list-style:none}.price-card li{margin:7px 0;color:#56637a}.price-card li:before{content:"✓";font-weight:900;color:var(--green);margin-right:8px}
 .band{background:var(--navy);color:#fff}.band .section-head p{color:#c7d4ef}.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.box{background:#fff;color:var(--ink);border-radius:20px;padding:26px;border:1px solid #e2e8f2}.box h3{margin-top:0}.contact-line{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #edf0f5}.contact-line:last-child{border:0}.dot{width:35px;height:35px;border-radius:10px;background:#edf4ff;display:grid;place-items:center;flex:none}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{margin-bottom:3px}.field.full{grid-column:1/-1}label{font-weight:800;font-size:13px;display:block;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #d8e0eb;border-radius:10px;padding:12px;font:inherit;outline:0;background:#fff}textarea{min-height:105px;resize:vertical}
+.form-status{display:none;margin-top:12px;padding:12px 14px;border-radius:10px;font-weight:700}.form-status.success{display:block;background:#ecfdf3;color:#137a3a;border:1px solid #b7ebca}.form-status.error{display:block;background:#fff1f0;color:#b42318;border:1px solid #f2c2bd}
 footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justify-content:space-between;gap:20px;align-items:center}.foot strong{color:#fff}
 @media(max-width:850px){nav{display:none}.mobile{display:inline-flex}.hero-grid,.programs,.details,.price-grid,.contact-grid{grid-template-columns:1fr}.hero{padding:55px 0}.hero-card{max-width:620px;margin:auto}.top .wrap{flex-direction:column}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.foot{flex-direction:column;text-align:center}}
 </style>
@@ -37,7 +38,6 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 <nav><a href="#program">Program</a><a href="#privat">Les Privat</a><a href="#futsal">Futsal</a><a href="#renang">Renang</a><a href="#daftar">Pendaftaran</a><a class="btn primary" href="#kontak">Hubungi Kami</a></nav>
 <a class="btn primary mobile" href="#daftar">Daftar</a>
 </div></header>
-
 <main>
 <section class="hero" id="beranda"><div class="wrap hero-grid">
 <div><span class="eyebrow">MENGAJAR UNTUK BERPRESTASI • BERBAGI UNTUK MENGINSPIRASI</span>
@@ -47,7 +47,6 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 </div>
 <div class="hero-card"><img src="assets/les-privat-1.png" alt="Program Les Privat Ds Bimbel"></div>
 </div></section>
-
 <section id="program"><div class="wrap">
 <div class="section-head"><h2>Program Ds Bimbel</h2><p>Pilih program yang paling sesuai untuk kebutuhan belajar dan pengembangan anak.</p></div>
 <div class="programs">
@@ -55,7 +54,6 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 <article class="program" id="futsal"><img src="assets/futsal.png" alt="Kursus Futsal Academy"><div class="program-body"><span class="tag">OLAHRAGA</span><h3>Kursus Futsal Academy</h3><p>Kelas futsal dengan pendampingan profesional untuk usia 6–9, 10–12, dan 13–15 tahun.</p><a class="btn primary" href="#harga-futsal">Lihat Paket</a></div></article>
 <article class="program" id="renang"><img src="assets/les-renang.png" alt="Les Renang Ds Bimbel"><div class="program-body"><span class="tag">OLAHRAGA</span><h3>Les Renang</h3><p>Kelas kecil maksimal 5 siswa, pelatih renang, tiket kolam, minuman, dan 4 kali pertemuan setiap bulan.</p><a class="btn primary" href="#harga-renang">Lihat Paket</a></div></article>
 </div></div></section>
-
 <section id="harga-privat"><div class="wrap">
 <div class="section-head"><h2>Biaya Les Privat</h2><p>Tarif per pertemuan sesuai jenjang.</p></div>
 <div class="price-grid">
@@ -64,7 +62,6 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 <div class="price-card"><span class="pill">SMA</span><h3>Les Privat</h3><div class="price">Rp80.000</div><p>per pertemuan</p><ul><li>Fokus target akademik</li><li>Materi sesuai kebutuhan</li><li>Persiapan ujian</li></ul></div>
 </div>
 </div></section>
-
 <section class="band" id="harga-futsal"><div class="wrap">
 <div class="section-head"><h2>Paket Kursus Futsal Academy</h2><p>4x sesi latihan per bulan. Harga sudah termasuk sewa lapangan, bola, rompi, dan cone.</p></div>
 <div class="price-grid">
@@ -78,7 +75,6 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 <div class="detail"><strong>💳 Pendaftaran</strong><p>Rp100.000 sekali di awal.</p></div>
 </div>
 </div></section>
-
 <section id="harga-renang"><div class="wrap">
 <div class="section-head"><h2>Paket Les Renang</h2><p>Kelas kecil maksimal 5 siswa agar perhatian pelatih lebih optimal.</p></div>
 <div class="price-grid">
@@ -92,9 +88,8 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 <div class="detail"><strong>📍 Lokasi</strong><p>New Surya Palace Hotel, Grand Sari Hotel, Hayyan Tirta, dan Lumba-Lumba.</p></div>
 </div>
 </div></section>
-
 <section id="daftar"><div class="wrap">
-<div class="section-head"><h2>Daftar Sekarang</h2><p>Isi data calon peserta. Tombol kirim akan membuka WhatsApp Ds Bimbel dengan pesan pendaftaran otomatis.</p></div>
+<div class="section-head"><h2>Daftar Sekarang</h2><p>Isi data calon peserta. Data akan disimpan ke database admin terlebih dahulu, lalu WhatsApp dibuka untuk mengirim pesan pendaftaran.</p></div>
 <div class="contact-grid">
 <div class="box"><h3>Kenapa memilih Ds Bimbel?</h3>
 <div class="contact-line"><span class="dot">✓</span><span><b>Program beragam</b><br>Akademik dan olahraga dalam satu layanan.</span></div>
@@ -115,30 +110,36 @@ footer{background:#06132f;color:#aebbd2;padding:35px 0}.foot{display:flex;justif
 <div class="field"><label>Nomor HP/WhatsApp *</label><input id="wa" required placeholder="08xxxxxxxxxx"></div>
 <div class="field full"><label>Program</label><select id="programSelect"><option value="Les Privat">Les Privat</option><option value="Futsal Academy">Futsal Academy</option><option value="Les Renang">Les Renang</option></select></div>
 <div class="field full"><label>Catatan Tambahan</label><textarea id="catatan" placeholder="Mata pelajaran, target belajar, atau kebutuhan lainnya"></textarea></div>
-<div class="field full"><button class="btn primary" style="width:100%" type="submit">Kirim Pendaftaran via WhatsApp</button></div>
+<div class="field full"><button id="regSubmit" class="btn primary" style="width:100%" type="submit">Simpan Pendaftaran & Kirim WhatsApp</button><div id="regStatus" class="form-status" role="status" aria-live="polite"></div></div>
 </div></form></div>
 </div></div></section>
-
 <section id="kontak" style="padding-top:20px"><div class="wrap"><div class="details">
 <div class="detail"><strong>📱 WhatsApp</strong><p><a href="https://wa.me/628994515669" target="_blank" rel="noopener">0899-4515-669</a></p></div>
 <div class="detail"><strong>📸 Instagram</strong><p>@dsbimbinganbelajar</p></div>
 <div class="detail"><strong>📍 Kantor Ds Bimbel</strong><p>Jl. Kenangan, Komp. Bumi Rawang Permai, Rawang, Padang Selatan, Kota Padang, Sumatera Barat</p><p><a class="btn outline" target="_blank" rel="noopener" href="https://www.google.com/maps/place/Ds+Bimbel/@-0.9791493,100.3810834,17z/data=!3m1!4b1!4m6!3m5!1s0x2fd4bbbeb96183d3:0x655bc3db4c07e99e!8m2!3d-0.9791547!4d100.3836583!16s%2Fg%2F11t7t2s_ql?entry=ttu&g_ep=EgoyMDI2MDgyNi4wIKXMDSoASAFQAw%3D%3D">Buka di Google Maps</a></p></div>
-<div class="map-card" style="margin-top:18px;padding:18px;border:1px solid #dce5f3;border-radius:18px;background:#fff;box-shadow:0 10px 30px #0b1d4d0d"><h3 style="margin:0 0 6px">📍 Titik Lokasi Ds Bimbel</h3><p style="margin:0 0 12px;color:#647089">Jl. Kenangan, Komp. Bumi Rawang Permai, Rawang, Padang Selatan, Kota Padang, Sumatera Barat</p><iframe title="Lokasi Ds Bimbel" src="https://www.google.com/maps?q=-0.9791547,100.3836583&z=17&output=embed" width="100%" height="300" style="border:0;border-radius:14px" loading="lazy" allowfullscreen></iframe><p style="margin:12px 0 0"><a class="btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/place/Ds+Bimbel/@-0.9791493,100.3810834,17z/data=!3m1!4b1!4m6!3m5!1s0x2fd4bbbeb96183d3:0x655bc3db4c07e99e!8m2!3d-0.9791547!4d100.3836583!16s%2Fg%2F11t7t2s_ql?entry=ttu&g_ep=EgoyMDI2MDgyNi4wIKXMDSoASAFQAw%3D%3D">Buka Titik Lokasi di Google Maps ↗</a></p></div>
+<div class="map-card" style="margin-top:18px;padding:18px;border:1px solid #dce5f3;border-radius:18px;background:#fff;box-shadow:0 10px 30px #0b1d4d0d"><h3 style="margin:0 0 6px">📍 Titik Lokasi Ds Bimbel</h3><p style="margin:0 0 12px;color:#647089">Jl. Kenangan, Komp.
+Bumi Rawang Permai, Rawang, Padang Selatan, Kota Padang, Sumatera Barat</p><iframe title="Lokasi Ds Bimbel" src="https://www.google.com/maps?q=-0.9791547,100.3836583&z=17&output=embed" width="100%" height="300" style="border:0;border-radius:14px" loading="lazy" allowfullscreen></iframe><p style="margin:12px 0 0"><a class="btn primary" target="_blank" rel="noopener" href="https://www.google.com/maps/place/Ds+Bimbel/@-0.9791493,100.3810834,17z/data=!3m1!4b1!4m6!3m5!1s0x2fd4bbbeb96183d3:0x655bc3db4c07e99e!8m2!3d-0.9791547!4d100.3836583!16s%2Fg%2F11t7t2s_ql?entry=ttu&g_ep=EgoyMDI2MDgyNi4wIKXMDSoASAFQAw%3D%3D">Buka Titik Lokasi di Google Maps ↗</a></p></div>
 </div></div></section>
 </main>
-
 <footer><div class="wrap foot"><div><strong>DS BIMBEL</strong><br>Bimbingan Belajar & Les Privat</div><div>Mengajar untuk Berprestasi • Berbagi untuk Menginspirasi</div></div></footer>
 <script>
 document.getElementById('regForm').addEventListener('submit',async function(e){
  e.preventDefault();
+ const form=e.currentTarget, btn=document.getElementById('regSubmit'), status=document.getElementById('regStatus');
  const nama=document.getElementById('nama').value.trim(), alamat=document.getElementById('alamat').value.trim(), gender=document.getElementById('gender').value, school=document.getElementById('school').value.trim(), jenjang=document.getElementById('jenjang').value, kelas=document.getElementById('kelas').value.trim(), paket=document.getElementById('paket').value, hariPrivat=document.getElementById('hariPrivat').value.trim(), pukul=document.getElementById('pukul').value, wa=document.getElementById('wa').value.trim(), prog=document.getElementById('programSelect').value, cat=document.getElementById('catatan').value.trim();
- const msg=`*Nama :* ${encodeURIComponent(nama)}%0A*Alamat :* ${encodeURIComponent(alamat||'-')}%0A*Jenis Kelamin :* ${encodeURIComponent(gender||'-')}%0A*Asal Sekolah :* ${encodeURIComponent(school||'-')}%0A*Jenjang Pendidikan :* ${encodeURIComponent(jenjang||'-')}%0A*Kelas :* ${encodeURIComponent(kelas||'-')}%0A*Paket Privat :* ${encodeURIComponent(paket||prog||'-')}%0A*Jadwal Hari Privat :* ${encodeURIComponent(hariPrivat||'-')}%0A*Pukul :* ${encodeURIComponent(pukul||'-')}%0A*Nomor HP/WhatsApp :* ${encodeURIComponent(wa)}`;
- const record={nama,alamat,gender,school,jenjang,kelas,paket,private_days:hariPrivat,private_time:pukul,wa,program:prog,catatan:cat,waktu:new Date().toLocaleString('id-ID')};
+ status.className='form-status'; status.textContent=''; btn.disabled=true; btn.textContent='Menyimpan pendaftaran...';
  try{
    const r=await fetch('/api/public/registrations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nama,address:alamat,gender,school,education_level:jenjang,class_name:kelas,private_package:paket,private_days:hariPrivat,private_time:pukul,whatsapp:wa,program:prog,notes:cat})});
-   if(!r.ok) throw new Error('API unavailable');
- }catch(_){ const key='dsbimbel_pendaftar_v3'; const arr=JSON.parse(localStorage.getItem(key)||'[]'); arr.push(record); localStorage.setItem(key,JSON.stringify(arr)); }
- window.open(`https://wa.me/628994515669?text=${msg}`,'_blank');
+   let data={}; try{data=await r.json()}catch{}
+   if(!r.ok) throw new Error(data.error||'Pendaftaran gagal disimpan ke server.');
+   status.className='form-status success'; status.textContent='✓ Pendaftaran berhasil disimpan. Data sudah masuk ke sistem admin. WhatsApp akan dibuka sekarang.';
+   const msg=`*Nama :* ${encodeURIComponent(nama)}%0A*Alamat :* ${encodeURIComponent(alamat||'-')}%0A*Jenis Kelamin :* ${encodeURIComponent(gender||'-')}%0A*Asal Sekolah :* ${encodeURIComponent(school||'-')}%0A*Jenjang Pendidikan :* ${encodeURIComponent(jenjang||'-')}%0A*Kelas :* ${encodeURIComponent(kelas||'-')}%0A*Paket Privat :* ${encodeURIComponent(paket||prog||'-')}%0A*Jadwal Hari Privat :* ${encodeURIComponent(hariPrivat||'-')}%0A*Pukul :* ${encodeURIComponent(pukul||'-')}%0A*Nomor HP/WhatsApp :* ${encodeURIComponent(wa)}`;
+   window.open(`https://wa.me/628994515669?text=${msg}`,'_blank');
+   form.reset();
+ }catch(err){
+   status.className='form-status error'; status.textContent='✕ '+(err.message||'Pendaftaran gagal. Silakan coba lagi.');
+   btn.disabled=false; btn.textContent='Simpan Pendaftaran & Kirim WhatsApp';
+ }
 });
 </script>
 </body>
