@@ -1,0 +1,50 @@
+V55 — FIX GAMBAR DESKTOP DS BIMBEL
+
+PENYEBAB:
+index.html memanggil:
+  assets/les-privat-1.png
+  assets/les-privat-2.png
+  assets/futsal.png
+  assets/les-renang.png
+
+Tetapi repository GitHub saat ini menyimpan file gambar di ROOT repository:
+  /les-privat-1.png
+  /les-privat-2.png
+  /futsal.png
+  /les-renang.png
+
+Akibatnya browser desktop meminta /assets/... dan file tidak ditemukan.
+Inilah sebab muncul ikon gambar rusak + teks "Program Les Privat Ds Bimbel".
+
+PERBAIKAN:
+Ganti 4 path pada index.html:
+
+1. src="assets/les-privat-1.png"
+   menjadi src="les-privat-1.png"
+
+2. src="assets/les-privat-2.png"
+   menjadi src="les-privat-2.png"
+
+3. src="assets/futsal.png"
+   menjadi src="futsal.png"
+
+4. src="assets/les-renang.png"
+   menjadi src="les-renang.png"
+
+Tidak perlu mengubah desain.
+
+SETELAH UPLOAD:
+1. Commit perubahan index.html ke branch main.
+2. Tunggu Vercel selesai deployment.
+3. Di Chrome tekan Ctrl+Shift+R.
+4. Jika masih memakai cache lama, buka Incognito dan cek:
+   https://ds-bimbel.vercel.app/
+
+HASIL YANG DIHARAPKAN:
+- Gambar hero Les Privat tampil.
+- Gambar kartu Les Privat tampil.
+- Gambar Futsal tampil.
+- Gambar Renang tampil.
+
+Catatan:
+GitHub saat ini memang menunjukkan file gambar berada di root repository, sedangkan index.html memanggil folder assets/.
