@@ -1,0 +1,133 @@
+V56_ADMIN_PATCH — menu + CRUD Lowongan Kerja.
+
+A) MENU:
+Pada sidebar setelah tombol Pendaftar tambahkan:
+<button onclick="tab('jobs',this)">💼 Lowongan Kerja</button>
+
+B) SECTION:
+Letakkan setelah section registrations:
+
+<section id="jobs" class="hidden">
+  <div class="panel">
+    <div class="toolbar" style="justify-content:space-between;align-items:center">
+      <div>
+        <h2 style="margin:0">💼 Lowongan Kerja</h2>
+        <p class="muted" style="margin:4px 0">Kelola lowongan yang tampil di website Ds Bimbel.</p>
+      </div>
+      <button class="btn primary" onclick="resetJobForm();document.getElementById('jobFormPanel').classList.toggle('hidden')">＋ Tambah Lowongan</button>
+    </div>
+
+    <div id="jobFormPanel" class="panel hidden" style="background:#f8fafc">
+      <input id="jobEditId" type="hidden">
+      <div class="grid">
+        <div><label>Judul Lowongan *</label><input id="jobTitle" placeholder="Contoh: Guru Bahasa Indonesia SMP"></div>
+        <div><label>Posisi *</label><input id="jobPosition" placeholder="Contoh: Guru Bahasa Indonesia"></div>
+        <div class="field full"><label>Gambar / Poster</label><input id="jobImage" placeholder="Contoh: lowongan-guru.png atau URL gambar"></div>
+        <div><label>Lokasi</label><input id="jobLocation" placeholder="Padang"></div>
+        <div><label>Jenis Pekerjaan</label><select id="jobType"><option>Part Time</option><option>Full Time</option><option>Freelance</option><option>Magang</option></select></div>
+        <div><label>Batas Pendaftaran</label><input id="jobDeadline" type="date"></div>
+        <div><label>WhatsApp Pendaftaran</label><input id="jobWa" placeholder="0899-4515-669"></div>
+        <div class="field full"><label>Kualifikasi</label><textarea id="jobQualification" placeholder="S1, pengalaman mengajar, ..."></textarea></div>
+        <div class="field full"><label>Deskripsi Pekerjaan</label><textarea id="jobDescription" placeholder="Tugas dan tanggung jawab..."></textarea></div>
+        <div class="field full"><label>Persyaratan</label><textarea id="jobRequirements" placeholder="Dokumen/ketentuan pelamar..."></textarea></div>
+        <div class="field full"><label>Link Lamaran (opsional)</label><input id="jobApplyUrl" placeholder="https://..."></div>
+        <div><label>Status</label><select id="jobStatus"><option>Aktif</option><option>Ditutup</option><option>Draft</option></select></div>
+        <div><label>Urutan</label><input id="jobOrder" type="number" value="0"></div>
+      </div>
+      <div style="margin-top:15px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" onclick="saveJob()">💾 Simpan Lowongan</button>
+        <button class="btn light" onclick="resetJobForm();document.getElementById('jobFormPanel').classList.add('hidden')">Batal</button>
+      </div>
+    </div>
+
+    <div class="table">
+      <table>
+        <thead><tr><th>Gambar</th><th>Judul</th><th>Posisi</th><th>Lokasi</th><th>Jenis</th><th>Batas</th><th>Status</th><th>Aksi</th></tr></thead>
+        <tbody id="jobRows"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+C) JAVASCRIPT:
+Tambahkan fungsi berikut di area script admin:
+
+function resetJobForm(){
+  ['jobEditId','jobTitle','jobPosition','jobImage','jobLocation','jobDeadline','jobQualification','jobDescription','jobRequirements','jobWa','jobApplyUrl'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  if(document.getElementById('jobType'))jobType.value='Part Time';
+  if(document.getElementById('jobStatus'))jobStatus.value='Aktif';
+  if(document.getElementById('jobOrder'))jobOrder.value='0';
+}
+
+async function loadJobs(){
+  try{
+    const rows=await api('/jobs');
+    window.jobsCache=rows||[];
+    renderJobsAdmin();
+  }catch(e){toast('Gagal memuat lowongan: '+e.message)}
+}
+
+function renderJobsAdmin(){
+  const rows=document.getElementById('jobRows');
+  if(!rows)return;
+  const a=window.jobsCache||[];
+  rows.innerHTML=a.length?a.map(x=>`<tr>
+    <td>${x.image_url?`<img src="${esc(x.image_url)}" style="width:90px;height:55px;object-fit:cover;border-radius:8px">`:'-'}</td>
+    <td><b>${esc(x.title)}</b></td>
+    <td>${esc(x.position)}</td>
+    <td>${esc(x.location||'-')}</td>
+    <td>${esc(x.employment_type||'-')}</td>
+    <td>${esc(x.deadline?String(x.deadline).slice(0,10):'-')}</td>
+    <td><span class="badge">${esc(x.status)}</span></td>
+    <td><button class="btn light" onclick="editJob(${JSON.stringify(x.id)})">Edit</button>
+    <button class="btn danger" onclick="deleteJob(${JSON.stringify(x.id)})">Hapus</button></td>
+  </tr>`).join(''):'<tr><td colspan="8" class="empty">Belum ada lowongan.</td></tr>';
+}
+
+function editJob(id){
+  const x=(window.jobsCache||[]).find(a=>String(a.id)===String(id));
+  if(!x)return;
+  jobEditId.value=x.id;jobTitle.value=x.title||'';jobPosition.value=x.position||'';jobImage.value=x.image_url||'';
+  jobLocation.value=x.location||'';jobType.value=x.employment_type||'Part Time';jobDeadline.value=x.deadline?String(x.deadline).slice(0,10):'';
+  jobQualification.value=x.qualification||'';jobDescription.value=x.description||'';jobRequirements.value=x.requirements||'';
+  jobWa.value=x.whatsapp||'';jobApplyUrl.value=x.apply_url||'';jobStatus.value=x.status||'Aktif';jobOrder.value=x.sort_order||0;
+  document.getElementById('jobFormPanel').classList.remove('hidden');
+}
+
+async function saveJob(){
+  if(!jobTitle.value.trim()||!jobPosition.value.trim()){toast('Judul dan posisi wajib diisi.');return}
+  const data={
+    title:jobTitle.value.trim(),position:jobPosition.value.trim(),image_url:jobImage.value.trim(),
+    location:jobLocation.value.trim(),employment_type:jobType.value,deadline:jobDeadline.value||null,
+    qualification:jobQualification.value.trim(),description:jobDescription.value.trim(),requirements:jobRequirements.value.trim(),
+    whatsapp:jobWa.value.trim()||'0899-4515-669',apply_url:jobApplyUrl.value.trim(),status:jobStatus.value,
+    sort_order:Number(jobOrder.value||0)
+  };
+  try{
+    const id=jobEditId.value;
+    await api(id?'/jobs/'+encodeURIComponent(id):'/jobs',{
+      method:id?'PATCH':'POST',
+      body:JSON.stringify(data)
+    });
+    toast(id?'Lowongan diperbarui.':'Lowongan berhasil ditambahkan.');
+    resetJobForm();
+    document.getElementById('jobFormPanel').classList.add('hidden');
+    await loadJobs();
+  }catch(e){toast('Gagal menyimpan: '+e.message)}
+}
+
+async function deleteJob(id){
+  if(!confirm('Hapus lowongan ini?'))return;
+  try{await api('/jobs/'+encodeURIComponent(id),{method:'DELETE'});toast('Lowongan dihapus.');await loadJobs()}
+  catch(e){toast('Gagal menghapus: '+e.message)}
+}
+
+D) PANGGIL loadJobs:
+Di akhir loadAll(), setelah data utama selesai, tambahkan:
+if(!localMode) await loadJobs();
+
+E) Saat tab jobs dibuka, boleh juga tambahkan pada fungsi tab():
+if(name==='jobs'&&!localMode)loadJobs();
+
+CATATAN:
+Field "Gambar / Poster" pada V56 menggunakan path/URL gambar. Untuk gambar yang nanti diberikan, cukup masukkan path seperti "lowongan-guru.png" jika file berada di root repository, atau URL gambar publik. Tahap berikutnya bisa kita upgrade menjadi tombol "Upload Gambar" ke Supabase Storage.

@@ -1,0 +1,76 @@
+V56_SERVER_PATCH — tambahkan setelah route /api/public/registrations dan sebelum static/catch-all.
+
+1) PUBLIC:
+app.get('/api/public/jobs',async(req,res)=>{
+  try{
+    const rows=await q(`select * from jobs
+      where status='Aktif'
+      and (deadline is null or deadline>=current_date)
+      order by sort_order asc, created_at desc`);
+    res.json(rows);
+  }catch(e){res.status(500).json({error:e.message})}
+});
+
+2) ADMIN LIST:
+app.get('/api/jobs',auth,async(req,res)=>{
+  try{
+    res.json(await q('select * from jobs order by sort_order asc, created_at desc'));
+  }catch(e){res.status(500).json({error:e.message})}
+});
+
+3) ADMIN CREATE:
+app.post('/api/jobs',auth,async(req,res)=>{
+  try{
+    const x=req.body||{};
+    if(!String(x.title||'').trim()||!String(x.position||'').trim())
+      return res.status(400).json({error:'Judul dan posisi lowongan wajib diisi.'});
+
+    const r=await q(`insert into jobs(
+      title,position,image_url,location,employment_type,deadline,
+      qualification,description,requirements,whatsapp,apply_url,status,sort_order
+    ) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning *`,[
+      String(x.title||'').trim(),
+      String(x.position||'').trim(),
+      x.image_url||'',
+      x.location||'',
+      x.employment_type||'Part Time',
+      x.deadline||null,
+      x.qualification||'',
+      x.description||'',
+      x.requirements||'',
+      x.whatsapp||'0899-4515-669',
+      x.apply_url||'',
+      x.status||'Aktif',
+      Number(x.sort_order||0)
+    ]);
+    res.status(201).json(r[0]);
+  }catch(e){res.status(500).json({error:e.message})}
+});
+
+4) ADMIN UPDATE:
+app.patch('/api/jobs/:id',auth,async(req,res)=>{
+  try{
+    const x=req.body||{};
+    const allowed=[
+      'title','position','image_url','location','employment_type','deadline',
+      'qualification','description','requirements','whatsapp','apply_url','status','sort_order'
+    ];
+    const keys=Object.keys(x).filter(k=>allowed.includes(k));
+    if(!keys.length)return res.status(400).json({error:'Tidak ada perubahan.'});
+    const vals=keys.map(k=>x[k]);
+    const set=keys.map((k,i)=>`${k}=$${i+1}`).join(',');
+    vals.push(req.params.id);
+    const r=await q(`update jobs set ${set},updated_at=now() where id=$${vals.length} returning *`,vals);
+    if(!r[0])return res.status(404).json({error:'Lowongan tidak ditemukan.'});
+    res.json(r[0]);
+  }catch(e){res.status(500).json({error:e.message})}
+});
+
+5) ADMIN DELETE:
+app.delete('/api/jobs/:id',auth,async(req,res)=>{
+  try{
+    const r=await q('delete from jobs where id=$1 returning id',[req.params.id]);
+    if(!r[0])return res.status(404).json({error:'Lowongan tidak ditemukan.'});
+    res.json({ok:true});
+  }catch(e){res.status(500).json({error:e.message})}
+});
