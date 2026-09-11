@@ -1,0 +1,20 @@
+# V54 — Public homepage image path + registration diagnostic
+
+Target: index.html
+
+A) Keep the existing registration form and POST URL /api/public/registrations.
+
+B) Add immediately before the existing submit listener:
+
+fetch('/api/public/registration-check',{cache:'no-store'})
+  .then(r=>r.json())
+  .then(x=>console.log('[Ds Bimbel registration-check]',x))
+  .catch(e=>console.warn('[Ds Bimbel registration-check]',e));
+
+C) Fix the hero/program image paths only if the deployed root contains the PNG files instead of the assets/ directory:
+assets/les-privat-1.png -> les-privat-1.png
+assets/les-privat-2.png -> les-privat-2.png
+assets/futsal.png -> futsal.png
+assets/les-renang.png -> les-renang.png
+
+If the files are kept under assets/, do not change the paths; instead verify that the assets/ folder is included in the deployment.
