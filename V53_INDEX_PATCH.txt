@@ -1,0 +1,37 @@
+=== V53 INDEX PATCH ===
+File: index.html
+
+Pada submit form pendaftaran publik, setelah `try{` dan sebelum `fetch('/api/public/registrations'...)`, tambahkan:
+
+const check=await fetch('/api/public/registration-check',{cache:'no-store'});
+let cd={};
+try{cd=await check.json()}catch{}
+if(!check.ok || !cd.ok){
+  throw new Error(cd.error||'Sistem pendaftaran online belum siap.');
+}
+
+Pastikan fetch POST tetap menuju:
+
+fetch('/api/public/registrations',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({
+    name:nama,
+    address:alamat,
+    gender,
+    school,
+    education_level:jenjang,
+    class_name:kelas,
+    private_package:paket,
+    private_days:hariPrivat,
+    private_time:pukul,
+    whatsapp:wa,
+    program:prog,
+    notes:cat
+  })
+})
+
+Pesan sukses tetap:
+`✓ Pendaftaran berhasil disimpan. Data sudah masuk ke sistem admin. WhatsApp akan dibuka sekarang.`
+
+=== SELESAI ===

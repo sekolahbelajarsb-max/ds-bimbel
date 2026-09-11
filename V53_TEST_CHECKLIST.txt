@@ -1,0 +1,19 @@
+V53 TEST CHECKLIST
+
+1. Setelah Vercel selesai deploy, buka:
+   https://ds-bimbel.vercel.app/api/public/registration-check
+
+2. Jika database aktif, harus muncul JSON seperti:
+   {"ok":true,"database":true,"registrations":true,"count":...}
+
+3. Buka halaman utama dan kirim satu pendaftaran uji.
+
+4. Setelah sukses, login Admin → Pendaftar Baru → Refresh.
+
+5. Pendaftar harus muncul dengan status `Pendaftar`.
+
+6. Jika langkah 1 masih menampilkan homepage:
+   berarti deployment aktif belum memakai `server/server.js` V53/V52. Jangan mengutak-atik desain; periksa deployment/branch Vercel yang terhubung ke repository.
+
+7. Jika langkah 1 menampilkan JSON tetapi submit gagal:
+   lihat pesan error di form. Endpoint sekarang mengembalikan `requestId` agar error dapat dilacak tanpa membocorkan password database.
