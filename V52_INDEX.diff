@@ -1,0 +1,9 @@
+--- a/index.html
++++ b/index.html
+@@
+-  try{
++  try{
++    const check=await fetch('/api/public/registration-check',{cache:'no-store'});
++    let cd={}; try{cd=await check.json()}catch{}
++    if(!check.ok || !cd.ok) throw new Error(cd.error||'Sistem pendaftaran online belum siap.');
+     const r=await fetch('/api/public/registrations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nama,address:alamat,gender,school,education_level:jenjang,class_name:kelas,private_package:paket,private_days:hariPrivat,private_time:pukul,whatsapp:wa,program:prog,notes:cat})});

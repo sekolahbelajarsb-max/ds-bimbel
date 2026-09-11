@@ -1,0 +1,64 @@
+--- a/server/server.js
++++ b/server/server.js
+@@
+-app.post('/api/public/registrations',async(req,res)=>{try{const x=req.body||{};const nama=x.nama||x.name||'',ortu=x.ortu||x.parent_name||'',wa=x.wa||x.whatsapp||'',program=(x.program||'Les Privat').replace(/^Kursus Futsal Academy$/i,'Futsal Academy'),jenjang=x.jenjang||x.level_or_age||x.education_level||'',area=x.area||'',catatan=x.catatan||x.notes||'',address=x.address||x.alamat||'',gender=x.gender||x.jenis_kelamin||'',school=x.school||x.asal_sekolah||'',education_level=x.education_level||jenjang||'',class_name=x.class_name||x.kelas||'',private_package=x.private_package||x.paket_privat||'',private_days=x.private_days||x.jadwal_hari_privat||'',private_time=x.private_time||x.pukul||'';if(!nama||!wa)return res.status(400).json({error:'Nama dan Nomor HP/WhatsApp wajib diisi'});const r=await q(`insert into registrations(name,parent_name,whatsapp,program,level_or_age,area,notes,address,gender,school,education_level,class_name,private_package,private_days,private_time,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Pendaftar') returning *`,[nama,ortu,wa,program,jenjang,area,catatan,address,gender,school,education_level,class_name,private_package,private_days,private_time]);res.status(201).json(r[0])}catch(e){res.status(500).json({error:e.message})}});
++app.post('/api/public/registrations',async(req,res)=>{
++  const requestId=crypto.randomUUID();
++  try{
++    const x=req.body||{};
++    const nama=x.nama||x.name||'';
++    const ortu=x.ortu||x.parent_name||'';
++    const wa=x.wa||x.whatsapp||'';
++    const program=(x.program||'Les Privat').replace(/^Kursus Futsal Academy$/i,'Futsal Academy');
++    const jenjang=x.jenjang||x.level_or_age||x.education_level||'';
++    const area=x.area||'';
++    const catatan=x.catatan||x.notes||'';
++    const address=x.address||x.alamat||'';
++    const gender=x.gender||x.jenis_kelamin||'';
++    const school=x.school||x.asal_sekolah||'';
++    const education_level=x.education_level||jenjang||'';
++    const class_name=x.class_name||x.kelas||'';
++    const private_package=x.private_package||x.paket_privat||'';
++    const private_days=x.private_days||x.jadwal_hari_privat||'';
++    const private_time=x.private_time||x.pukul||'';
++    if(!nama||!wa)return res.status(400).json({ok:false,requestId,error:'Nama dan Nomor HP/WhatsApp wajib diisi'});
++    const r=await q(`insert into registrations(name,parent_name,whatsapp,program,level_or_age,area,notes,address,gender,school,education_level,class_name,private_package,private_days,private_time,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'Pendaftar') returning *`,[nama,ortu,wa,program,jenjang,area,catatan,address,gender,school,education_level,class_name,private_package,private_days,private_time]);
++    res.status(201).json({ok:true,requestId,registration:r[0]});
++  }catch(e){
++    console.error('[PUBLIC_REGISTRATION]',requestId,e);
++    res.status(500).json({
++      ok:false,
++      requestId,
++      error:'Pendaftaran gagal disimpan ke database.',
++      detail:String(e.message||e).replace(/postgres(?:ql)?:\/\/[^\s]+/gi,'postgresql://***:***@***')
++    });
++  }
++});
++
++app.get('/api/public/registration-check',async(req,res)=>{
++  try{
++    if(!pool)return res.status(503).json({ok:false,database:false,registrations:false,error:'DATABASE_URL belum dikonfigurasi'});
++    await ensureSchema();
++    const r=await pool.query('select count(*)::int as count from registrations');
++    res.json({ok:true,database:true,registrations:true,count:r.rows[0]?.count||0});
++  }catch(e){
++    res.status(503).json({
++      ok:false,database:false,registrations:false,
++      error:String(e.message||e).replace(/postgres(?:ql)?:\/\/[^\s]+/gi,'postgresql://***:***@***')
++    });
++  }
++});
+
+--- a/index.html
++++ b/index.html
+@@
+-  try{
++  try{
++    const check=await fetch('/api/public/registration-check',{cache:'no-store'});
++    let cd={}; try{cd=await check.json()}catch{}
++    if(!check.ok || !cd.ok) throw new Error(cd.error||'Sistem pendaftaran online belum siap.');
+     const r=await fetch('/api/public/registrations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:nama,address:alamat,gender,school,education_level:jenjang,class_name:kelas,private_package:paket,private_days:hariPrivat,private_time:pukul,whatsapp:wa,program:prog,notes:cat})});
+@@
+-    if(!r.ok) throw new Error(data.error||'Pendaftaran gagal disimpan ke server.');
++    if(!r.ok) throw new Error(data.error||'Pendaftaran gagal disimpan ke server.');
+     status.className='form-status success'; status.textContent='✓ Pendaftaran berhasil disimpan. Data sudah masuk ke sistem admin. WhatsApp akan dibuka sekarang.';
