@@ -1,0 +1,36 @@
+V59 — OPSIONAL API LOWONGAN
+
+Jika ingin langsung menghubungkan ke Supabase, tambahkan tabel jobs pada schema_v27.sql:
+
+create table if not exists jobs(
+ id bigserial primary key,
+ title text not null,
+ position text not null,
+ image_url text,
+ location text,
+ employment_type text,
+ deadline date,
+ qualification text,
+ description text,
+ requirements text,
+ whatsapp text,
+ status text default 'Aktif',
+ sort_order integer default 0,
+ created_at timestamptz default now()
+);
+
+Tambahkan pada server/server.js setelah const tables=...:
+
+app.get('/api/public/jobs',async(req,res)=>{
+ try{
+   const rows=await q(`select * from jobs where status='Aktif' and (deadline is null or deadline>=current_date) order by sort_order asc,id desc`);
+   res.json(rows);
+ }catch(e){res.status(500).json({error:e.message})}
+});
+
+app.get('/api/jobs',auth,async(req,res)=>{
+ try{res.json(await q('select * from jobs order by sort_order asc,id desc'))}
+ catch(e){res.status(500).json({error:e.message})}
+});
+
+Catatan: V59 public page sengaja tidak bergantung pada endpoint ini agar poster tetap tampil walaupun modul database belum terpasang.

@@ -1,0 +1,83 @@
+V59 — PASANG LOWONGAN AGAR BENAR-BENAR TAMPIL DI WEBSITE
+
+HASIL PEMERIKSAAN:
+Repository main saat ini masih memakai index.html lama dan belum memiliki menu/section Lowongan Kerja. V56/V57 belum terpasang ke source yang sedang dideploy.
+
+CARA TERCEPAT:
+Tambahkan blok CSS berikut sebelum </style> pada index.html:
+
+.jobs{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+.job-card{background:#fff;border:1px solid #e2e8f2;border-radius:21px;overflow:hidden;box-shadow:0 10px 30px #0b1d4d0b}
+.job-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.job-body{padding:22px}
+.job-body h3{font-size:23px;margin:5px 0}
+.job-meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.job-meta span{background:#eef4ff;color:#1356c5;padding:6px 9px;border-radius:8px;font-size:12px;font-weight:800}
+.job-card ul{padding-left:20px;color:#56637a}
+@media(max-width:850px){.jobs{grid-template-columns:1fr}}
+
+DI DALAM NAV, tambahkan setelah Pendaftaran:
+<a href="#lowongan">💼 Lowongan Kerja</a>
+
+SEBELUM section id="daftar", tambahkan:
+
+<section id="lowongan">
+<div class="wrap">
+<div class="section-head">
+<h2>💼 Lowongan Kerja Ds Bimbel</h2>
+<p>Bergabung bersama Ds Bimbel dan ikut berkontribusi dalam pendidikan dan pengembangan peserta.</p>
+</div>
+
+<div class="jobs">
+
+<article class="job-card">
+<img src="lowongan-guru-les-privat.jpeg" alt="Lowongan Guru Les Privat Matematika">
+<div class="job-body">
+<span class="tag">LOWONGAN AKTIF • PART TIME</span>
+<h3>Guru Les Privat Matematika</h3>
+<p><b>📚 Jenjang:</b> SMP & SMA</p>
+<p><b>📍 Lokasi:</b> Aur Kuning, Kota Bukittinggi</p>
+<h4>Kualifikasi</h4>
+<ul>
+<li>Perempuan</li>
+<li>Pendidikan S1 / mahasiswa semester akhir</li>
+<li>Menyukai anak-anak</li>
+<li>Serius bekerja</li>
+<li>Pengalaman lebih diutamakan</li>
+<li>Memiliki kendaraan pribadi</li>
+</ul>
+<p><b>📄 Dokumen:</b> Surat lamaran, ijazah terakhir, transkrip nilai, CV, dan KTP dalam 1 file PDF.</p>
+<a class="btn primary" target="_blank" rel="noopener" href="https://wa.me/628994515669?text=Halo%20Ds%20Bimbel%2C%20saya%20ingin%20melamar%20sebagai%20Guru%20Les%20Privat%20Matematika.">Lamar via WhatsApp</a>
+</div>
+</article>
+
+<article class="job-card">
+<img src="lowongan-pelatih-renang.jpeg" alt="Lowongan Pelatih Renang Ds Bimbel">
+<div class="job-body">
+<span class="tag">LOWONGAN AKTIF • PART TIME</span>
+<h3>Pelatih Renang Pria / Wanita</h3>
+<p><b>📍 Lokasi:</b> Padang</p>
+<p><b>📅 Jadwal:</b> Sabtu & Minggu</p>
+<p><b>🕗 Waktu:</b> 08.00–11.00 WIB</p>
+<h4>Kualifikasi</h4>
+<ul>
+<li>Pria/Wanita</li>
+<li>Memiliki kemampuan berenang yang baik</li>
+<li>Mampu mengajarkan teknik dasar hingga pengembangan kemampuan</li>
+<li>Menyukai dunia anak-anak dan mampu berkomunikasi dengan baik</li>
+<li>Sabar, ramah, disiplin, dan bertanggung jawab</li>
+<li>Pengalaman sebagai pelatih menjadi nilai tambah</li>
+</ul>
+<a class="btn primary" target="_blank" rel="noopener" href="https://wa.me/628994515669?text=Halo%20Ds%20Bimbel%2C%20saya%20ingin%20melamar%20sebagai%20Pelatih%20Renang.">Lamar via WhatsApp</a>
+</div>
+</article>
+
+</div></div></section>
+
+PENTING:
+Salin dua gambar berikut ke ROOT repository (sejajar dengan index.html):
+- lowongan-guru-les-privat.jpeg
+- lowongan-pelatih-renang.jpeg
+
+Ini adalah versi yang sengaja dibuat langsung tampil tanpa menunggu database jobs.
+Setelah lowongan sudah tampil, tahap berikutnya dapat menghubungkannya ke Admin/Supabase.
