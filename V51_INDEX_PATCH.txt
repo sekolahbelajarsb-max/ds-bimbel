@@ -1,0 +1,40 @@
+DS BIMBEL V51 — PUBLIC FORM PATCH
+
+FILE: index.html
+
+V50 sudah menghapus fallback localStorage. V51 menambahkan pemeriksaan
+kesiapan sistem sebelum submit agar pengguna langsung tahu jika database
+pendaftaran sedang bermasalah.
+
+Tambahkan fungsi berikut sebelum event listener regForm:
+
+async function checkRegistrationSystem(){
+  const r=await fetch('/api/public/registration-check',{
+    credentials:'omit',
+    cache:'no-store'
+  });
+  let d={};
+  try{d=await r.json()}catch{}
+  if(!r.ok || !d.ok || !d.database || !d.registrations){
+    throw new Error(d.error||'Sistem pendaftaran online sedang tidak siap.');
+  }
+  return d;
+}
+
+Kemudian di dalam submit handler V50, setelah:
+  btn.disabled=true;
+  btn.textContent='Menyimpan pendaftaran...';
+
+tambahkan:
+
+await checkRegistrationSystem();
+
+Saran urutan try:
+1. checkRegistrationSystem()
+2. POST /api/public/registrations
+3. cek r.ok
+4. tampilkan pesan sukses
+5. buka WhatsApp
+
+Jika checkRegistrationSystem gagal, jangan buka WhatsApp dan aktifkan kembali
+tombol submit.

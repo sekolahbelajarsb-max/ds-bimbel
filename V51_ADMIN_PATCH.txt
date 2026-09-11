@@ -1,0 +1,61 @@
+DS BIMBEL V51 — ADMIN AUTO REFRESH + DIAGNOSTIC
+
+FILE: admin.html
+
+Tambahkan tombol berikut pada section Pendaftar, di toolbar yang sudah
+memiliki tombol Refresh:
+
+<button class="btn primary" type="button"
+  onclick="checkRegistrationDatabase()">🔎 Cek Database Pendaftar</button>
+
+Tambahkan area status di bawah toolbar:
+
+<div id="registrationSystemStatus"
+  class="panel"
+  style="margin:0 0 15px;padding:13px;background:#f7f9fc">
+  Memeriksa sistem pendaftaran...
+</div>
+
+Tambahkan fungsi:
+
+async function checkRegistrationDatabase(){
+  const box=document.getElementById('registrationSystemStatus');
+  if(!box)return;
+  box.textContent='Memeriksa database pendaftar...';
+  try{
+    const r=await fetch('/api/public/registration-check',{
+      credentials:'omit',
+      cache:'no-store'
+    });
+    const d=await r.json();
+    if(!r.ok || !d.ok){
+      box.innerHTML='<b style="color:#b42318">🔴 Database pendaftaran bermasalah.</b> '
+        +esc(d.error||'Endpoint tidak dapat diakses.');
+      return false;
+    }
+    box.innerHTML='<b style="color:#137333">🟢 Database pendaftaran aktif.</b> '
+      +'Total data masuk: <b>'+esc(d.count)+'</b> pendaftar.';
+    return true;
+  }catch(e){
+    box.innerHTML='<b style="color:#b42318">🔴 Gagal memeriksa database.</b> '
+      +esc(e.message||'Tidak dapat terhubung.');
+    return false;
+  }
+}
+
+Agar otomatis memperbarui daftar Pendaftar setiap 15 detik, tambahkan di
+bagian akhir script admin.html:
+
+setInterval(()=>{
+  if(
+    document.getElementById('app')?.style.display!=='none' &&
+    !document.getElementById('registrations')?.classList.contains('hidden') &&
+    !localMode
+  ){
+    loadAll();
+    checkRegistrationDatabase();
+  }
+},15000);
+
+Ini tidak mengaktifkan mode lokal. Dengan ALLOW_LOCAL_MODE=false, sumber data
+tetap Supabase.
