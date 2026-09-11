@@ -1,0 +1,64 @@
+V58 — SERVER: UPLOAD POSTER LOWONGAN KE SUPABASE STORAGE
+
+TUJUAN
+Admin dapat memilih file gambar poster dari komputer/HP, lalu gambar diunggah ke Supabase Storage dan URL-nya disimpan pada jobs.image_url.
+
+PRASYARAT ENV VERCEL
+Tambahkan:
+SUPABASE_URL=https://stvtmuebrleileobshin.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<ambil dari Supabase Project Settings > API>
+Jangan pernah memasukkan SERVICE_ROLE_KEY ke HTML/browser atau mengirimkannya melalui chat.
+
+TAMBAHKAN DEPENDENCY
+npm install multer
+
+TAMBAHKAN DI server/server.js
+Di bagian require:
+const multer=require('multer');
+
+Setelah app/express dibuat:
+const upload=multer({
+  storage:multer.memoryStorage(),
+  limits:{fileSize:5*1024*1024},
+  fileFilter:(req,file,cb)=>{
+    const ok=/^image\/(jpeg|png|webp)$/i.test(file.mimetype);
+    cb(ok?null:new Error('Poster harus JPG, PNG, atau WEBP.'),ok);
+  }
+});
+
+Tambahkan helper:
+async function supabaseStorageUpload(file){
+  if(!process.env.SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)
+    throw new Error('Supabase Storage belum dikonfigurasi.');
+  const bucket='job-posters';
+  const ext=(file.originalname.split('.').pop()||'jpg').toLowerCase();
+  const safe=ext==='jpeg'?'jpg':ext;
+  const name=`${Date.now()}-${Math.random().toString(36).slice(2,9)}.${safe}`;
+  const endpoint=`${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${name}`;
+  const r=await fetch(endpoint,{
+    method:'POST',
+    headers:{
+      Authorization:`Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      apikey:process.env.SUPABASE_SERVICE_ROLE_KEY,
+      'Content-Type':file.mimetype,
+      'x-upsert':'true'
+    },
+    body:file.buffer
+  });
+  if(!r.ok) throw new Error(`Upload poster gagal (${r.status}).`);
+  return `${process.env.SUPABASE_URL}/storage/v1/object/public/${bucket}/${name}`;
+}
+
+Tambahkan endpoint terlindungi:
+app.post('/api/jobs/upload-poster',requireAuth,upload.single('poster'),async(req,res)=>{
+  try{
+    if(!req.file) return res.status(400).json({error:'Pilih gambar poster terlebih dahulu.'});
+    const url=await supabaseStorageUpload(req.file);
+    res.status(201).json({ok:true,url});
+  }catch(e){
+    res.status(500).json({error:e.message||'Upload poster gagal.'});
+  }
+});
+
+CATATAN
+Jika versi Node yang dipakai Vercel belum menyediakan global fetch, gunakan node-fetch sesuai package.json. Jangan menaruh SERVICE_ROLE_KEY di admin.html.

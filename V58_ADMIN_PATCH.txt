@@ -1,0 +1,41 @@
+V58 — ADMIN: PILIH & UPLOAD POSTER
+
+Di form Tambah/Edit Lowongan, tambahkan:
+
+<div class="field">
+  <label>Poster Lowongan</label>
+  <input id="jobPosterFile" type="file" accept="image/jpeg,image/png,image/webp">
+  <small>Maksimal 5 MB. JPG, PNG, atau WEBP.</small>
+  <div id="jobPosterPreview"></div>
+  <input id="jobImageUrl" type="hidden">
+</div>
+
+Tambahkan JS:
+document.getElementById('jobPosterFile')?.addEventListener('change', async function(){
+  const file=this.files?.[0];
+  const preview=document.getElementById('jobPosterPreview');
+  const hidden=document.getElementById('jobImageUrl');
+  if(!file)return;
+  if(file.size>5*1024*1024){ alert('Ukuran poster maksimal 5 MB.'); this.value=''; return; }
+  if(!/^image\/(jpeg|png|webp)$/i.test(file.type)){ alert('Gunakan JPG, PNG, atau WEBP.'); this.value=''; return; }
+  preview.innerHTML=`<img src="${URL.createObjectURL(file)}" style="max-width:320px;max-height:240px;border-radius:12px">`;
+});
+
+Saat tombol Simpan ditekan:
+const file=document.getElementById('jobPosterFile')?.files?.[0];
+let imageUrl=document.getElementById('jobImageUrl')?.value||existingJob?.image_url||'';
+
+if(file){
+  const fd=new FormData();
+  fd.append('poster',file);
+  const up=await fetch('/api/jobs/upload-poster',{method:'POST',body:fd});
+  const data=await up.json().catch(()=>({}));
+  if(!up.ok) throw new Error(data.error||'Upload poster gagal.');
+  imageUrl=data.url;
+}
+
+Kemudian kirim image_url:imageUrl pada POST/PUT jobs yang sudah ada.
+
+HASIL
+Admin tidak perlu lagi memasukkan URL gambar.
+Pilih file -> preview -> Simpan -> poster tersimpan di Supabase Storage -> website menampilkan poster.
