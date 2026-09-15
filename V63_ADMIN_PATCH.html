@@ -1,0 +1,36 @@
+<!-- V63: Tambahkan tombol menu ini setelah tombol Pendaftar atau Pengaturan -->
+<button onclick="tab('jobs',this)">💼 Lowongan Kerja</button>
+
+<!-- V63: Tambahkan section ini sebelum </main> -->
+<section id="jobs" class="hidden">
+ <div class="panel">
+  <div class="toolbar" style="justify-content:space-between;align-items:center"><div><h2 style="margin:0">💼 Lowongan Kerja</h2><p class="muted" style="margin:4px 0">Kelola lowongan yang tampil di website publik.</p></div><button class="btn primary" onclick="resetJobForm();document.getElementById('jobFormPanel').classList.toggle('hidden')">＋ Tambah Lowongan</button></div>
+  <div id="jobFormPanel" class="panel hidden" style="background:#f8fafc">
+   <input id="jobEditId" type="hidden">
+   <div class="grid">
+    <div><label>Judul Lowongan *</label><input id="jobTitle" placeholder="Guru Les Privat Matematika"></div>
+    <div><label>Kategori</label><input id="jobCategory" value="Lowongan Kerja"></div>
+    <div><label>Lokasi</label><input id="jobLocation" placeholder="Padang / Bukittinggi"></div>
+    <div><label>Jadwal</label><input id="jobSchedule" placeholder="Sabtu/Minggu 08.00–11.00"></div>
+    <div><label>WhatsApp</label><input id="jobWa" value="628994515669"></div>
+    <div><label>URL/Nama Poster</label><input id="jobImage" placeholder="/lowongan-pelatih-renang.jpeg"></div>
+    <div><label>Status</label><select id="jobStatus"><option>Aktif</option><option>Nonaktif</option></select></div>
+    <div style="grid-column:1/-1"><label>Deskripsi</label><textarea id="jobDescription" rows="3"></textarea></div>
+    <div style="grid-column:1/-1"><label>Persyaratan (pisahkan dengan ;)</label><textarea id="jobRequirements" rows="4"></textarea></div>
+   </div>
+   <div style="margin-top:15px"><button class="btn primary" onclick="saveJob()">💾 Simpan Lowongan</button> <button class="btn light" onclick="document.getElementById('jobFormPanel').classList.add('hidden')">Batal</button></div>
+  </div>
+ </div>
+ <div class="panel"><div class="table"><table><thead><tr><th>Poster</th><th>Judul</th><th>Lokasi</th><th>Jadwal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="jobRows"></tbody></table></div></div>
+</section>
+
+<!-- V63: Tambahkan JS ini sebelum </script> terakhir -->
+<script>
+const jobCache=[];
+function renderJobs(){const el=document.getElementById('jobRows');if(!el)return;el.innerHTML=jobCache.length?jobCache.map(x=>`<tr><td>${x.image_url?`<img src="${esc(x.image_url)}" style="width:80px;height:55px;object-fit:cover;border-radius:8px">`:'-'}</td><td><b>${esc(x.title)}</b><br><small>${esc(x.category||'')}</small></td><td>${esc(x.location||'-')}</td><td>${esc(x.schedule||'-')}</td><td><span class="badge">${esc(x.status||'-')}</span></td><td><button class="btn light" onclick="editJob(${JSON.stringify(x.id)})">Edit</button> <button class="btn danger" onclick="deleteJob(${JSON.stringify(x.id)})">Hapus</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Belum ada lowongan.</td></tr>'}
+async function loadJobs(){try{const d=await api('/jobs');jobCache.splice(0,jobCache.length,...d);renderJobs()}catch(e){toast(e.message)}}
+function resetJobForm(){['jobEditId','jobTitle','jobLocation','jobSchedule','jobDescription','jobRequirements','jobImage'].forEach(id=>document.getElementById(id).value='');document.getElementById('jobCategory').value='Lowongan Kerja';document.getElementById('jobWa').value='628994515669';document.getElementById('jobStatus').value='Aktif'}
+function editJob(id){const x=jobCache.find(a=>String(a.id)===String(id));if(!x)return;document.getElementById('jobEditId').value=x.id;document.getElementById('jobTitle').value=x.title||'';document.getElementById('jobCategory').value=x.category||'Lowongan Kerja';document.getElementById('jobLocation').value=x.location||'';document.getElementById('jobSchedule').value=x.schedule||'';document.getElementById('jobWa').value=x.whatsapp||'628994515669';document.getElementById('jobImage').value=x.image_url||'';document.getElementById('jobStatus').value=x.status||'Aktif';document.getElementById('jobDescription').value=x.description||'';document.getElementById('jobRequirements').value=x.requirements||'';document.getElementById('jobFormPanel').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+async function saveJob(){const id=document.getElementById('jobEditId').value;const data={title:jobTitle.value,category:jobCategory.value,location:jobLocation.value,schedule:jobSchedule.value,description:jobDescription.value,requirements:jobRequirements.value,whatsapp:jobWa.value,image_url:jobImage.value,status:jobStatus.value};try{await api(id?'/jobs/'+id:'/jobs',{method:id?'PATCH':'POST',body:JSON.stringify(data)});toast('Lowongan tersimpan');document.getElementById('jobFormPanel').classList.add('hidden');resetJobForm();loadJobs()}catch(e){toast(e.message)}}
+async function deleteJob(id){if(!confirm('Hapus lowongan ini?'))return;try{await api('/jobs/'+id,{method:'DELETE'});toast('Lowongan dihapus');loadJobs()}catch(e){toast(e.message)}}
+</script>
