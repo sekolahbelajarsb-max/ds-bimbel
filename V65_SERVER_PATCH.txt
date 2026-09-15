@@ -1,0 +1,10 @@
+Tambahkan BLOK V63 JOBS berikut ke server.js SEBELUM baris:
+const publicDir=path.resolve(__dirname,'..');
+
+// ===== V63 LOWONGAN KERJA =====
+const jobFields=['title','category','location','schedule','description','requirements','whatsapp','image_url','status'];
+app.get('/api/jobs',auth,async(req,res)=>{try{res.json(await q('select * from jobs order by id desc'))}catch(e){res.status(500).json({error:e.message})}});
+app.get('/api/public/jobs',async(req,res)=>{try{res.json(await q("select * from jobs where status='Aktif' order by published_at desc,id desc"))}catch(e){res.status(500).json({error:e.message})}});
+app.post('/api/jobs',auth,async(req,res)=>{try{const x=req.body||{};if(!x.title)return res.status(400).json({error:'Judul lowongan wajib diisi'});const r=await q(`insert into jobs(title,category,location,schedule,description,requirements,whatsapp,image_url,status) values($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *`,[x.title,x.category||'Lowongan Kerja',x.location||'',x.schedule||'',x.description||'',x.requirements||'',x.whatsapp||'628994515669',x.image_url||'',x.status||'Aktif']);res.status(201).json(r[0])}catch(e){res.status(500).json({error:e.message})}});
+app.patch('/api/jobs/:id',auth,async(req,res)=>{try{const x=req.body||{};const keys=jobFields.filter(k=>Object.prototype.hasOwnProperty.call(x,k));if(!keys.length)return res.status(400).json({error:'Tidak ada perubahan'});const vals=keys.map(k=>x[k]);vals.push(req.params.id);const set=keys.map((k,i)=>`${k}=$${i+1}`).join(',');const r=await q(`update jobs set ${set},updated_at=now() where id=$${vals.length} returning *`,vals);if(!r[0])return res.status(404).json({error:'Lowongan tidak ditemukan'});res.json(r[0])}catch(e){res.status(500).json({error:e.message})}});
+app.delete('/api/jobs/:id',auth,async(req,res)=>{try{await q('delete from jobs where id=$1',[req.params.id]);res.json({ok:true})}catch(e){res.status(500).json({error:e.message})}});
