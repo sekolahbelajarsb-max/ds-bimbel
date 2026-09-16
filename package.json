@@ -1,15 +1,8 @@
 {
-  "name": "ds-bimbel-v46",
-  "version": "47.0.0",
+  "name": "ds-bimbel-v69",
+  "version": "69.0.0",
   "private": true,
-  "scripts": {
-    "start": "node server/server.js"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "dependencies": {
-    "express": "^5.1.0",
-    "pg": "^8.16.3"
-  }
+  "scripts": { "start": "node server/server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "express": "^5.1.0", "pg": "^8.16.3" }
 }
